@@ -195,7 +195,7 @@ const LoginForm = () => {
 
             <Button
               disabled={isLoading}
-              className="text-base font-medium text-[#F8FAF9] leading-[120%] rounded-[8px] w-full h-[48px] bg-btnPrimary"
+              className="text-base font-medium text-[#F8FAF9] leading-[120%] rounded-[8px] w-full h-[48px] bg-btnPrimary hover:bg-btnPrimary/80"
               type="submit"
             >
               {isLoading ? "Sign In ..." : "Sign In"}
