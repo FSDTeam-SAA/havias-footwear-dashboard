@@ -416,6 +416,7 @@ import { Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Link from "next/link";
+import Title from "../../_components/Title";
 
 // Dummy category data
 const dummyCategories = [
@@ -445,11 +446,16 @@ const CategoryList = () => {
   return (
     <div className="">
       {/* Header */}
-      <div className="border-b border-gray-200 px-6 py-5 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Categories</h1>
-        <Button size="sm" className="bg-[#797068] hover:bg-[#3a3129] text-white text-base h-[50px] px-6">
-          Add Category
-        </Button>
+      <div className="px-6 py-5 ">
+        <div className="flex justify-between w-full">
+          <Title title='Categories List' active='Dashboard > Categories > List' />
+          <Link href={"/categories/add-categories"}>
+            <Button size="sm" className="bg-[#797068] hover:bg-[#3a3129] text-white text-base h-[50px] px-6">
+              Add Category
+            </Button>
+          </Link>
+        </div>
+        <h1 className="text-2xl mt-10 font-bold text-gray-900">Categories</h1>
       </div>
 
       {/* Table */}
@@ -549,8 +555,8 @@ const CategoryList = () => {
               onClick={() => handlePageChange(page)}
               variant={currentPage === page ? "default" : "outline"}
               className={`h-9 w-9 p-0 ${currentPage === page
-                  ? "bg-gray-800 text-white hover:bg-gray-900"
-                  : "border-gray-300 hover:bg-gray-50"
+                ? "bg-gray-800 text-white hover:bg-gray-900"
+                : "border-gray-300 hover:bg-gray-50"
                 }`}
             >
               {page}
