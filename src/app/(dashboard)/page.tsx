@@ -1,9 +1,17 @@
 import React from 'react'
+import Title from './_components/Title'
+import OverviewCard from './_components/OverviewCard'
+import { RevenueReport } from './_components/Chart'
 
-function page() {
+function Page() {
+ 
   return (
-    <div>page</div>
+    <div className='py-[14px] px-[50px]'>
+      <Title title="Over View" active="Dashboard" />
+      <OverviewCard />
+      <RevenueReport/>
+    </div>
   )
 }
 
-export default page
+export default Page

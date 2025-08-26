@@ -118,7 +118,7 @@ const ForgotPasswordForm = () => {
 
             <Button
               disabled={isPending}
-              className="text-lg font-medium text-[#F8FAF9] leading-[120%] rounded-[8px] w-full h-[52px] bg-[#293440]"
+              className="text-lg font-medium text-[#F8FAF9] leading-[120%] rounded-[8px] w-full h-[52px] bg-btnPrimary hover:bg-btnPrimary/80"
               type="submit"
             >
               {isPending ? "Sending..." : "Send"}
