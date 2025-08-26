@@ -14,14 +14,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Link from "next/link";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
 // Fixed and consistent dummy data
 const dummyCategories = [
   {
@@ -30,106 +22,59 @@ const dummyCategories = [
     description:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi diam lorem, mollis eget elit eu dolor.",
     image: categoryImage,
-    productId: "1140",
-    msrp: "$12.00",
-    moq: "50",
-    unitPrice: "$8.00",
-    packPrice: "$0.25",
-    quantity: "100",
     date: "04/21/2025 03:18pm",
-    status: "In Stock",
   },
   {
     id: 2,
-    productName: "Classic Denim Jacket",
+    productName: "Westwood Shirt Men's Black",
     description:
-      "Premium quality denim jacket with vintage styling and modern comfort.",
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi diam lorem, mollis eget elit eu dolor.",
     image: categoryImage,
-    productId: "1141",
-    msrp: "$89.99",
-    moq: "25",
-    unitPrice: "$65.00",
-    packPrice: "$2.50",
-    quantity: "75",
-    date: "04/20/2025 02:30pm",
-    status: "Out Of Stock",
+    date: "04/21/2025 03:18pm",
   },
   {
     id: 3,
-    productName: "Premium Cotton T-Shirt",
+    productName: "Westwood Shirt Men's Black",
     description:
-      "Soft cotton t-shirt with breathable fabric and comfortable fit.",
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi diam lorem, mollis eget elit eu dolor.",
     image: categoryImage,
-    productId: "1142",
-    msrp: "$24.99",
-    moq: "100",
-    unitPrice: "$18.00",
-    packPrice: "$0.75",
-    quantity: "200",
-    date: "04/19/2025 01:15pm",
-    status: "In Stock",
+    date: "04/21/2025 03:18pm",
   },
   {
     id: 4,
-    productName: "Wool Blend Sweater",
-    description: "Cozy wool blend sweater perfect for cold weather styling.",
+    productName: "Westwood Shirt Men's Black",
+    description:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi diam lorem, mollis eget elit eu dolor.",
     image: categoryImage,
-    productId: "1143",
-    msrp: "$79.99",
-    moq: "30",
-    unitPrice: "$55.00",
-    packPrice: "$2.00",
-    quantity: "45",
-    date: "04/18/2025 04:45pm",
-    status: "In Stock",
+    date: "04/21/2025 03:18pm",
   },
   {
     id: 5,
-    productName: "Casual Chino Pants",
+    productName: "Westwood Shirt Men's Black",
     description:
-      "Versatile chino pants suitable for both casual and semi-formal occasions.",
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi diam lorem, mollis eget elit eu dolor.",
     image: categoryImage,
-    productId: "1144",
-    msrp: "$49.99",
-    moq: "40",
-    unitPrice: "$35.00",
-    packPrice: "$1.25",
-    quantity: "120",
-    date: "04/17/2025 11:20am",
-    status: "In Stock",
+    date: "04/21/2025 03:18pm",
   },
   {
     id: 6,
-    productName: "Athletic Performance Shorts",
-    description: "High-performance shorts with moisture-wicking technology.",
+    productName: "Westwood Shirt Men's Black",
+    description:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi diam lorem, mollis eget elit eu dolor.",
     image: categoryImage,
-    productId: "1145",
-    msrp: "$34.99",
-    moq: "60",
-    unitPrice: "$24.00",
-    packPrice: "$0.85",
-    quantity: "0",
-    date: "04/16/2025 09:30am",
-    status: "Out Of Stock",
+    date: "04/21/2025 03:18pm",
   },
   {
     id: 7,
-    productName: "Formal Dress Shirt",
+    productName: "Westwood Shirt Men's Black",
     description:
-      "Crisp formal shirt with professional styling and wrinkle-resistant fabric.",
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi diam lorem, mollis eget elit eu dolor.",
     image: categoryImage,
-    productId: "1146",
-    msrp: "$59.99",
-    moq: "20",
-    unitPrice: "$42.00",
-    packPrice: "$1.50",
-    quantity: "80",
-    date: "04/15/2025 03:45pm",
-    status: "In Stock",
+    date: "04/21/2025 03:18pm",
   },
 ];
 
-const ProductList = () => {
+const BlogList = () => {
   const itemsPerPage = 7;
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -143,22 +88,6 @@ const ProductList = () => {
     setCurrentPage(page);
   };
 
-  const getQuantityDisplay = (quantity: string) => {
-    const qty = parseInt(quantity);
-    return (
-      <span
-        className={`text-sm font-medium ${
-          qty === 0
-            ? "text-red-600"
-            : qty < 50
-            ? "text-orange-600"
-            : "text-gray-900"
-        }`}
-      >
-        {quantity}
-      </span>
-    );
-  };
 
   return (
     <div className="">
@@ -166,7 +95,7 @@ const ProductList = () => {
       <div className="border-b border-gray-200 pb-7">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">Products</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">Blog management</h1>
             <div className="flex items-center space-x-2 text-sm">
               <Link
                 href="/dashboard"
@@ -175,28 +104,20 @@ const ProductList = () => {
                 Dashboard
               </Link>
               <span className="text-gray-400">›</span>
-              <span className="text-gray-500 text-base">Products</span>
+              <span className="text-gray-500 text-base">Blog management</span>
+              <span className="text-gray-400">›</span>
+              <span className="text-gray-500 text-base">List</span>
             </div>
           </div>
 
           <div className="flex items-center space-x-3">
-            <Select>
-              <SelectTrigger className="w-[180px] h-[50px] border border-[#797068]">
-                <SelectValue placeholder="Select One" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="option1">Option 1</SelectItem>
-                <SelectItem value="option2">Option 2</SelectItem>
-                <SelectItem value="option3">Option 3</SelectItem>
-              </SelectContent>
-            </Select>
             <Button
               size="sm"
               className="bg-[#797068] hover:bg-[#3a3129] text-white text-base h-[50px] px-6"
             >
-              <Link href="/product/add" className="flex items-center">
+              <Link href="/blog/add" className="flex items-center">
                 <Plus className="h-4 w-4 mr-2" />
-                Add resource
+                Add Blog
               </Link>
             </Button>
           </div>
@@ -210,28 +131,10 @@ const ProductList = () => {
             <TableHeader>
               <TableRow className="border-b border-gray-200">
                 <TableHead className="text-left py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-80">
-                  Product Name
+                  Blog Name
                 </TableHead>
                 <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-24">
-                  ID
-                </TableHead>
-                <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-24">
-                  MSRP
-                </TableHead>
-                <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-20">
-                  MOQ
-                </TableHead>
-                <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-24">
-                  Unit Price
-                </TableHead>
-                <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-24">
-                  Pack Price
-                </TableHead>
-                <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-20">
-                  Quantity
-                </TableHead>
-                <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-40">
-                  Date Added
+                 Added
                 </TableHead>
                 <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-28">
                   Actions
@@ -268,59 +171,14 @@ const ProductList = () => {
                   {/* Product ID Column */}
                   <TableCell className="text-center px-4 py-4">
                     <span className="text-sm font-medium text-gray-900 bg-gray-100 px-2 py-1 rounded">
-                      #{product.productId}
+                      {product.date}
                     </span>
-                  </TableCell>
-
-                  {/* MSRP Column */}
-                  <TableCell className="text-center px-4 py-4">
-                    <span className="text-sm font-bold text-gray-900">
-                      {product.msrp}
-                    </span>
-                  </TableCell>
-
-                  {/* MOQ Column */}
-                  <TableCell className="text-center px-4 py-4">
-                    <span className="text-sm text-gray-700 bg-blue-50 px-2 py-1 rounded">
-                      {product.moq}
-                    </span>
-                  </TableCell>
-
-                  {/* Unit Price Column */}
-                  <TableCell className="text-center px-4 py-4">
-                    <span className="text-sm font-bold text-green-600">
-                      {product.unitPrice}
-                    </span>
-                  </TableCell>
-
-                  {/* Pack Price Column */}
-                  <TableCell className="text-center px-4 py-4">
-                    <span className="text-sm text-gray-700">
-                      {product.packPrice}
-                    </span>
-                  </TableCell>
-
-                  {/* Quantity Column */}
-                  <TableCell className="text-center px-4 py-4">
-                    {getQuantityDisplay(product.quantity)}
-                  </TableCell>
-
-                  {/* Date Column */}
-                  <TableCell className="text-center px-4 py-4">
-                    <div className="text-xs">
-                      <div className="text-gray-900 font-medium">
-                        {product.date.split(" ")[0]}
-                      </div>
-                      <div className="text-gray-500">
-                        {product.date.split(" ")[1]}
-                      </div>
-                    </div>
                   </TableCell>
 
                   {/* Actions Column */}
                   <TableCell className="text-center px-4 py-4">
                     <div className="flex justify-center items-center gap-2">
-                      <Link href={`/product/edit/${product.id}`}>
+                      <Link href={`/blog/edit/${product.id}`}>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -416,4 +274,4 @@ const ProductList = () => {
   );
 };
 
-export default ProductList;
+export default BlogList;

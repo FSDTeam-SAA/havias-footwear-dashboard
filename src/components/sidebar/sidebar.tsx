@@ -21,8 +21,8 @@ import Image from "next/image";
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Product", href: "/product", icon: Grip },
-  { name: "Sub Category", href: "/sub-category", icon: ShoppingBasket },
-  { name: "Order", href: "/orders", icon: ShoppingCart },
+  { name: "Revenue from Seller ", href: "/revenue", icon: ShoppingBasket },
+  { name: "Blog management", href: "/blog", icon: ShoppingCart },
   { name: "Fabric", href: "/fabric", icon: FileText },
   // { name: "Message", href: "/message", icon: MessageSquare },
   { name: "Style", href: "/style", icon: Scissors },
@@ -37,7 +37,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <div className="flex h-screen sticky bottom-0 top-0 w-[280px] flex-col bg-[#1C2228] z-50">
+    <div className="flex h-screen sticky bottom-0 top-0 w-[350px] flex-col bg-[#1C2228] z-50">
       <div className="h-[80px] flex items-center justify-start shadow-md px-4">
         <Image
           src={logo}
