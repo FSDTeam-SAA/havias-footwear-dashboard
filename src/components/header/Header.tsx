@@ -60,7 +60,7 @@ export default function Header() {
           className="flex items-center space-x-2 text-white text-sm cursor-pointer hover:bg-white/10 rounded-lg px-2 py-1 transition-colors"
           onClick={toggleDropdown}
         >
-          <span>tanvir@gmail.com</span>
+          <span>client@gmail.com</span>
           <Avatar className="h-8 w-8">
             <AvatarImage src="/placeholder.svg?height=32&width=32" />
             <AvatarFallback className="text-black">TA</AvatarFallback>
