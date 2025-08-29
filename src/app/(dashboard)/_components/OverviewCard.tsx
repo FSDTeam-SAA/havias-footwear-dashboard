@@ -27,8 +27,8 @@ const OverviewCard = () => {
                             </p>
                         </div>
                         <div className='w-[54px] h-[54px]'>
-                            
-                        <Image alt="icon" src={card.icon} width={900} height={900} className="object-contain" />
+
+                            <Image alt="icon" src={card.icon} width={900} height={900} className="object-contain" />
                         </div>
                     </CardContent>
                 </Card>
