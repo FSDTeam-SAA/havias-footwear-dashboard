@@ -104,7 +104,7 @@ const SellerList = () => {
                         </div>
                     </div>
                 </div>
-                 <div>
+                <div>
                     <Card>
                         <CardContent className="bg-[#797068] flex flex-col items-center rounded-md py-3 px-6">
                             <h1 className="text-[#F4F4F4] font-medium text-[20px]">Total Seller </h1>
@@ -152,9 +152,7 @@ const SellerList = () => {
                                             </p>
                                         </div>
                                     </TableCell>
-
                                     {/* Orders Data */}
-
                                     {/* Actions */}
                                     <TableCell className="text-center px-4 py-4">
                                         <div className="flex justify-center items-center gap-2">
