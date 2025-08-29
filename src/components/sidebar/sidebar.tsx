@@ -7,12 +7,15 @@ import logo from "@/public/images/haviasFooterLogo.png";
 import {
   LayoutDashboard,
   DollarSign,
-  FileText,
   LogOut,
-  ShoppingCart,
   Grip,
   ShoppingBasket,
-  Scissors,
+  Columns3Cog,
+  AppWindow,
+  User2,
+  UserCheck,
+  Users,
+  Settings,
   // Bell,
 } from "lucide-react";
 import Image from "next/image";
@@ -20,17 +23,16 @@ import Image from "next/image";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
+  { name: "Categories", href: "/categories", icon: Columns3Cog },
   { name: "Product", href: "/product", icon: Grip },
-  { name: "Revenue from Seller ", href: "/revenue", icon: ShoppingBasket },
-  { name: "Blog management", href: "/blog", icon: ShoppingCart },
-  { name: "Fabric", href: "/fabric", icon: FileText },
-  // { name: "Message", href: "/message", icon: MessageSquare },
-  { name: "Style", href: "/style", icon: Scissors },
-  {
-    name: "Accents",
-    href: "/accents",
-    icon: DollarSign,
-  },
+  { name: "Request Product", href: "/request-product", icon: ShoppingBasket },
+  { name: "Revenue from Seller ", href: "/revenue-from-seller ", icon: DollarSign },
+  { name: "Blog management", href: "/blog", icon: AppWindow },
+  { name: "Seller Management", href: "/seller-management", icon: User2 },
+  { name: "Seller Profile Request ", href: "/seller-profile-request", icon: UserCheck },
+  { name: "Buyer Profile ", href: "/buyer-profile", icon: Users },
+  { name: "Setting ", href: "/setting", icon: Settings },
+
 ];
 
 export function Sidebar() {
@@ -63,20 +65,20 @@ export function Sidebar() {
               className={cn(
                 "flex w-[90%] mx-auto items-center justify-start gap-2 space-y-1 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
                 isActive
-                  ? "bg-white text-black"
-                  : "text-slate-300 hover:bg-slate-600/50 hover:text-white"
+                  ? "bg-btnPrimary text-white"
+                  : "text-white hover:bg-btnPrimary/70 hover:text-white"
               )}
             >
               <item.icon
                 className={cn(
                   "h-6 w-6 transition-colors duration-200",
-                  isActive ? "text-black" : ""
+                  isActive ? "text-white" : ""
                 )}
               />
               <span
                 className={cn(
                   "font-normal text-base leading-[120%] transition-colors duration-200 text-center",
-                  isActive ? "text-black font-medium" : ""
+                  isActive ? "text-white font-medium" : ""
                 )}
               >
                 {item.name}

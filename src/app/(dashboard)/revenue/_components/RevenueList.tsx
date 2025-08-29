@@ -136,11 +136,10 @@ const RevenueList = () => {
                 size="sm"
                 onClick={() => handlePageChange(page)}
                 variant={currentPage === page ? "default" : "outline"}
-                className={`h-9 w-9 p-0 ${
-                  currentPage === page
-                    ? "bg-gray-800 text-white hover:bg-gray-900"
-                    : "border-gray-300 hover:bg-gray-50"
-                }`}
+                className={`h-9 w-9 p-0 ${currentPage === page
+                  ? "bg-gray-800 text-white hover:bg-gray-900"
+                  : "border-gray-300 hover:bg-gray-50"
+                  }`}
               >
                 {page}
               </Button>
