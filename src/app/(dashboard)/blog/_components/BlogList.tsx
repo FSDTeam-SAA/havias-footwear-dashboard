@@ -129,14 +129,14 @@ const BlogList = () => {
         <div className="overflow-x-auto">
           <Table className="w-full">
             <TableHeader>
-              <TableRow className="border-b border-gray-200">
-                <TableHead className="text-left py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-80">
+              <TableRow className="border-b bo rder-gray-200">
+                <TableHead className="text-left py-4 font-bold text-[#131313] text-base uppercase leading-[120%] w-80">
                   Blog Name
                 </TableHead>
-                <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-24">
+                <TableHead className="text-center py-4 font-bold text-[#131313] text-base uppercase leading-[120%] w-24">
                  Added
                 </TableHead>
-                <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-28">
+                <TableHead className="text-center py-4 font-bold text-[#131313] text-base uppercase leading-[120%] w-28">
                   Actions
                 </TableHead>
               </TableRow>
@@ -152,13 +152,13 @@ const BlogList = () => {
                         <Image
                           src={product.image}
                           alt={product.productName}
-                          width={56}
-                          height={56}
+                          width={100}
+                          height={100}
                           className="rounded-lg object-cover border border-gray-200"
                         />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="font-semibold text-gray-900 text-sm mb-1 truncate">
+                        <p className="font-semibold text-[#272727] text-sm mb-1 truncate">
                           {product.productName}
                         </p>
                         <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
@@ -170,7 +170,7 @@ const BlogList = () => {
 
                   {/* Product ID Column */}
                   <TableCell className="text-center px-4 py-4">
-                    <span className="text-sm font-medium text-gray-900 bg-gray-100 px-2 py-1 rounded">
+                    <span className="text-base font-medium text-[]  px-2 py-1 rounded">
                       {product.date}
                     </span>
                   </TableCell>
