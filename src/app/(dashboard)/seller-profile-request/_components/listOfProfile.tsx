@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import React, { useState } from "react";
@@ -14,14 +12,6 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-    Pagination,
-    PaginationContent,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-} from "@/components/ui/pagination";
 import {
     Dialog,
     DialogContent,
@@ -48,6 +38,61 @@ const dummyUsers = [
         deliveryDate: "2025-08-01",
     },
     {
+        id: 8,
+        name: "John Doe",
+        email: "john@example.com",
+        avatar: "https://i.pravatar.cc/150?img=1",
+        totalOrder: 25,
+        deliveredOrder: 20,
+        pendingOrder: 3,
+        cancelOrder: 2,
+        deliveryDate: "2025-08-01",
+    },
+    {
+        id: 7,
+        name: "John Doe",
+        email: "john@example.com",
+        avatar: "https://i.pravatar.cc/150?img=1",
+        totalOrder: 25,
+        deliveredOrder: 20,
+        pendingOrder: 3,
+        cancelOrder: 2,
+        deliveryDate: "2025-08-01",
+    },
+    {
+        id: 6,
+        name: "John Doe",
+        email: "john@example.com",
+        avatar: "https://i.pravatar.cc/150?img=1",
+        totalOrder: 25,
+        deliveredOrder: 20,
+        pendingOrder: 3,
+        cancelOrder: 2,
+        deliveryDate: "2025-08-01",
+    },
+    {
+        id: 5,
+        name: "John Doe",
+        email: "john@example.com",
+        avatar: "https://i.pravatar.cc/150?img=1",
+        totalOrder: 25,
+        deliveredOrder: 20,
+        pendingOrder: 3,
+        cancelOrder: 2,
+        deliveryDate: "2025-08-01",
+    },
+    {
+        id: 4,
+        name: "John Doe",
+        email: "john@example.com",
+        avatar: "https://i.pravatar.cc/150?img=1",
+        totalOrder: 25,
+        deliveredOrder: 20,
+        pendingOrder: 3,
+        cancelOrder: 2,
+        deliveryDate: "2025-08-01",
+    },
+    {
         id: 2,
         name: "Sarah Smith",
         email: "sarah@example.com",
@@ -58,7 +103,6 @@ const dummyUsers = [
         cancelOrder: 1,
         deliveryDate: "2025-08-12",
     },
-
 ];
 
 type User = {
@@ -79,6 +123,14 @@ const ListOfProfile = () => {
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
     const totalPages = Math.ceil(dummyUsers.length / itemsPerPage);
+
+    // ✅ Fix: pagination handler
+    const handlePageChange = (page: number) => {
+        if (page >= 1 && page <= totalPages) {
+            setCurrentPage(page);
+        }
+    };
+
     const paginatedUsers = dummyUsers.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
@@ -87,34 +139,29 @@ const ListOfProfile = () => {
     return (
         <div>
             {/* Header Section */}
-            <div className="border-b flex justify-between border-[#B6B6B6] pb-7">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-2xl font-bold text-[#595959] mb-1">
-                            Seller Profile Request
-                        </h1>
-                        <div className="flex items-center space-x-2 text-sm">
-                            <Link
-                                href="/dashboard"
-                                className="text-gray-500 text-base hover:text-gray-700 transition-colors"
-                            >
-                                Dashboard
-                            </Link>
-                            <span className="text-gray-400"> › </span>
-                            <span className="text-gray-500 text-base">Seller Profile Request</span>
-                        </div>
+            <div className=" flex justify-between  pb-7">
+                <div>
+                    <h1 className="text-2xl font-bold text-[#595959] mb-1">
+                        Seller Profile Request
+                    </h1>
+                    <div className="flex items-center space-x-2 text-sm">
+                        <Link
+                            href="/dashboard"
+                            className="text-gray-500 text-base hover:text-gray-700 transition-colors"
+                        >
+                            Dashboard
+                        </Link>
+                        <span className="text-gray-400"> › </span>
+                        <span className="text-gray-500 text-base">Seller Profile Request</span>
                     </div>
                 </div>
 
-                <div>
-                    <Card>
-                        <CardContent className="bg-[#797068] flex flex-col items-center rounded-md py-3 px-6">
-                            <h1 className="text-[#F4F4F4] font-medium text-[20px]">Total Request </h1>
-                            <p className="text-[#FFFFFF] font-normal text-[16px]">4,200.00</p>
-                        </CardContent>
-                    </Card>
-                </div>
-
+                <Card>
+                    <CardContent className="bg-[#797068] flex flex-col items-center rounded-md py-3 px-6">
+                        <h1 className="text-[#F4F4F4] font-medium text-[20px]">Total Request </h1>
+                        <p className="text-[#FFFFFF] font-normal text-[16px]">4,200.00</p>
+                    </CardContent>
+                </Card>
             </div>
 
             {/* Table Section */}
@@ -122,7 +169,7 @@ const ListOfProfile = () => {
                 <div className="overflow-x-auto">
                     <Table className="w-full">
                         <TableHeader>
-                            <TableRow className="border-b border-[#B6B6B6] ">
+                            <TableRow className="border-b border-t border-[#B6B6B6] ">
                                 <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-40">
                                     Seller Id
                                 </TableHead>
@@ -137,12 +184,11 @@ const ListOfProfile = () => {
 
                         <TableBody>
                             {paginatedUsers.map((user) => (
-                                <TableRow key={user.id}>
+                                <TableRow key={user.id} className="border-[#B6B6B6]">
                                     <TableCell className="text-center text-sm font-medium text-[#595959]">
                                         {user.id}
                                     </TableCell>
-
-                                    <TableCell className="py-4 flex  justify-center">
+                                    <TableCell className="py-4 flex justify-center">
                                         <div className="flex items-center gap-3">
                                             <Avatar className="h-10 w-10">
                                                 <AvatarImage src={user.avatar} alt={user.name} />
@@ -155,23 +201,20 @@ const ListOfProfile = () => {
                                             </p>
                                         </div>
                                     </TableCell>
-                                    {/* Orders Data */}
-                                    {/* Actions */}
                                     <TableCell className="text-center px-4 py-4">
                                         <div className="flex justify-center items-center gap-2">
-
-                                            {/* Dropdown (Approve / Reject) */}
+                                            {/* Dropdown */}
                                             <Select onValueChange={(value) => console.log("Selected:", value)}>
-                                                <SelectTrigger className="w-[120px] border-none shadow-none  rounded-full h-8">
+                                                <SelectTrigger className="w-[120px] border-none shadow-none rounded-full h-8">
                                                     <SelectValue placeholder="Action" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="approve"> Approve</SelectItem>
-                                                    <SelectItem value="reject"> Reject</SelectItem>
+                                                    <SelectItem value="approve">Approve</SelectItem>
+                                                    <SelectItem value="reject">Reject</SelectItem>
                                                 </SelectContent>
                                             </Select>
 
-                                            {/* View Button */}
+                                            {/* View */}
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
@@ -183,7 +226,7 @@ const ListOfProfile = () => {
                                                 View
                                             </Button>
 
-                                            {/* Delete Button */}
+                                            {/* Delete */}
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
@@ -192,78 +235,73 @@ const ListOfProfile = () => {
                                             >
                                                 <Trash2 className="w-4 h-4 mr-1" />
                                             </Button>
-
-
                                         </div>
                                     </TableCell>
-
                                 </TableRow>
                             ))}
                         </TableBody>
                     </Table>
                 </div>
 
-                {/* Pagination */}
-                <div className="flex flex-col md:flex-row md:justify-between md:items-center px-6 py-4 bg-gray-50 border-t border-gray-200 gap-4">
-                    <p className="text-sm text-gray-600">
-                        Showing{" "}
-                        <span className="font-medium">
-                            {(currentPage - 1) * itemsPerPage + 1}
-                        </span>{" "}
-                        to{" "}
-                        <span className="font-medium">
-                            {Math.min(currentPage * itemsPerPage, dummyUsers.length)}
-                        </span>{" "}
-                        of <span className="font-medium">{dummyUsers.length}</span> results
-                    </p>
+                {/* ✅ Fixed Pagination */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-6 py-4 bg-gray-50 border-t border-gray-200">
+                    <div className="mb-2 sm:mb-0">
+                        <p className="text-sm text-gray-600">
+                            Showing{" "}
+                            <span className="font-medium">
+                                {(currentPage - 1) * itemsPerPage + 1}
+                            </span>{" "}
+                            to{" "}
+                            <span className="font-medium">
+                                {Math.min(currentPage * itemsPerPage, dummyUsers.length)}
+                            </span>{" "}
+                            of <span className="font-medium">{dummyUsers.length}</span> results
+                        </p>
+                    </div>
 
-                    <Pagination>
-                        <PaginationContent>
-                            <PaginationItem>
-                                <PaginationPrevious
-                                    href="#"
-                                    onClick={() =>
-                                        currentPage > 1 && setCurrentPage(currentPage - 1)
-                                    }
-                                    className={
-                                        currentPage === 1 ? "pointer-events-none opacity-50" : ""
-                                    }
-                                />
-                            </PaginationItem>
+                    <div className="flex items-center space-x-2">
+                        {/* Previous */}
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
+                            className="h-9 w-9 p-0 border-gray-300 disabled:opacity-50"
+                        >
+                            ‹
+                        </Button>
 
-                            {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                                (page) => (
-                                    <PaginationItem key={page}>
-                                        <PaginationLink
-                                            href="#"
-                                            isActive={currentPage === page}
-                                            onClick={() => setCurrentPage(page)}
-                                        >
-                                            {page}
-                                        </PaginationLink>
-                                    </PaginationItem>
-                                )
-                            )}
+                        {/* Page Numbers */}
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                            <Button
+                                key={page}
+                                size="sm"
+                                onClick={() => handlePageChange(page)}
+                                variant={currentPage === page ? "default" : "outline"}
+                                className={`h-9 w-9 p-0 ${currentPage === page
+                                    ? "bg-gray-800 text-white hover:bg-gray-900"
+                                    : "border-gray-300 hover:bg-gray-50"
+                                    }`}
+                            >
+                                {page}
+                            </Button>
+                        ))}
 
-                            <PaginationItem>
-                                <PaginationNext
-                                    href="#"
-                                    onClick={() =>
-                                        currentPage < totalPages && setCurrentPage(currentPage + 1)
-                                    }
-                                    className={
-                                        currentPage === totalPages
-                                            ? "pointer-events-none opacity-50"
-                                            : ""
-                                    }
-                                />
-                            </PaginationItem>
-                        </PaginationContent>
-                    </Pagination>
+                        {/* Next */}
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                            className="h-9 w-9 p-0 border-gray-300 disabled:opacity-50"
+                        >
+                            ›
+                        </Button>
+                    </div>
                 </div>
             </div>
 
-            {/* ✅ Modal */}
+            {/* Modal */}
             <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
                 <DialogContent className="sm:max-w-md">
                     {selectedUser && (
@@ -274,7 +312,6 @@ const ListOfProfile = () => {
                                     Full information about this buyer
                                 </DialogDescription>
                             </DialogHeader>
-
                             <div className="flex items-center gap-4 py-4">
                                 <Avatar className="h-16 w-16">
                                     <AvatarImage
@@ -287,16 +324,12 @@ const ListOfProfile = () => {
                                 </Avatar>
                                 <div>
                                     <p className="text-lg font-semibold">{selectedUser.name}</p>
-                                    <p className="text-sm text-gray-500">
-                                        ID: {selectedUser.id}
-                                    </p>
+                                    <p className="text-sm text-gray-500">ID: {selectedUser.id}</p>
                                 </div>
                             </div>
-
                             <div className="space-y-2 text-sm">
                                 <p>
-                                    <span className="font-medium">Email:</span>{" "}
-                                    {selectedUser.email}
+                                    <span className="font-medium">Email:</span> {selectedUser.email}
                                 </p>
                                 <p>
                                     <span className="font-medium">Total Orders:</span>{" "}
@@ -307,7 +340,6 @@ const ListOfProfile = () => {
                                     {selectedUser.deliveryDate}
                                 </p>
                             </div>
-
                             <DialogFooter>
                                 <Button variant="secondary" onClick={() => setSelectedUser(null)}>
                                     Close
