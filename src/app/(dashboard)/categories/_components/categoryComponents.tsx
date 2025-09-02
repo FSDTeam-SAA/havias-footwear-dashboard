@@ -23,12 +23,13 @@ const dummyCategories = [
 const CategoryList = () => {
   const itemsPerPage = 7;
   const [currentPage, setCurrentPage] = useState(1);
-
+  
   const totalPages = Math.ceil(dummyCategories.length / itemsPerPage);
   const paginatedCategories = dummyCategories.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+  
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -64,7 +65,6 @@ const CategoryList = () => {
               </TableHead>
             </TableRow>
           </TableHeader>
-
           <TableBody>
             {paginatedCategories.map((category) => (
               <TableRow key={category.id}>
@@ -101,7 +101,7 @@ const CategoryList = () => {
                       title="Delete Category"
                       onClick={() => {
                         if (confirm(`Are you sure you want to delete "${category.name}"?`)) {
-                 
+
                         }
                       }}
                     >
