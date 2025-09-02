@@ -52,16 +52,6 @@ const RevenueList = () => {
         </div>
 
         <div className="flex items-center space-x-3">
-          {/* <Select>
-            <SelectTrigger className="w-[180px] h-[50px] border border-[#797068]">
-              <SelectValue placeholder="Select One" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="option1">Option 1</SelectItem>
-              <SelectItem value="option2">Option 2</SelectItem>
-              <SelectItem value="option3">Option 3</SelectItem>
-            </SelectContent>
-          </Select> */}
         </div>
       </div>
 
@@ -70,13 +60,13 @@ const RevenueList = () => {
         <Table className="w-full border-collapse">
           <TableHeader>
             <TableRow className="border-b border-gray-200">
-              <TableHead className="py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-10 text-center">
+              <TableHead className="py-4 font-bold text-[#131313] text-base uppercase leading-[120%] w-10 text-center">
                 Seller ID
               </TableHead>
-              <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-24">
+              <TableHead className="text-center font-bold text-[#131313] text-base uppercase leading-[120%] w-24">
                 Product ID
               </TableHead>
-              <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-24">
+              <TableHead className="text-center font-bold text-[#131313] text-base uppercase leading-[120%] w-24">
                 Revenue from Seller
               </TableHead>
             </TableRow>
@@ -86,17 +76,17 @@ const RevenueList = () => {
             {paginatedCategories.map((product) => (
               <TableRow key={product.id}>
                 <TableCell className="text-center px-4 py-4">
-                  <span className="text-sm font-medium text-gray-900 bg-gray-100 px-2 py-1 rounded">
+                  <span className="text-base font-medium text-[#424242] px-2 py-1">
                     #{product.seller_id}
                   </span>
                 </TableCell>
                 <TableCell className="text-center px-4 py-4">
-                  <span className="text-sm font-bold text-gray-900">
+                  <span className="text-base font-medium text-[#424242]  ">
                     {product.product_id}
                   </span>
                 </TableCell>
                 <TableCell className="text-center px-4 py-4">
-                  <span className="text-sm text-gray-700 bg-blue-50 px-2 py-1 rounded">
+                  <span className="text-base font-medium text-[#424242]  ">
                     {product.revenue}
                   </span>
                 </TableCell>
@@ -106,7 +96,7 @@ const RevenueList = () => {
         </Table>
 
         {/* Pagination */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-6 py-4 bg-gray-50 border-t border-gray-200">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-6 py-4 border-t border-gray-200">
           <p className="text-sm text-gray-600 mb-2 sm:mb-0">
             Showing{" "}
             <span className="font-medium">

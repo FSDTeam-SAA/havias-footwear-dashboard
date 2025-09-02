@@ -8,7 +8,7 @@ import Link from 'next/link'
 function Page() {
 
   return (
-    <div className='py-[14px] px-[50px]'>
+    <div className=''>
       <Title title="Over View" active="Dashboard" />
       <div className='space-y-[32px]'>
         <OverviewCard />

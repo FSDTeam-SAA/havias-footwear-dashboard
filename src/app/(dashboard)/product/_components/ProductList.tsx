@@ -26,7 +26,7 @@ import {
 const dummyCategories = [
   {
     id: 1,
-    productName: "Westwood Shirt Men's Black",
+    productName: "Shirt-Black",
     description:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi diam lorem, mollis eget elit eu dolor.",
     image: categoryImage,
@@ -41,7 +41,7 @@ const dummyCategories = [
   },
   {
     id: 2,
-    productName: "Classic Denim Jacket",
+    productName: "Shirt-Black",
     description:
       "Premium quality denim jacket with vintage styling and modern comfort.",
     image: categoryImage,
@@ -56,7 +56,7 @@ const dummyCategories = [
   },
   {
     id: 3,
-    productName: "Premium Cotton T-Shirt",
+    productName: "Shirt-Black",
     description:
       "Soft cotton t-shirt with breathable fabric and comfortable fit.",
     image: categoryImage,
@@ -71,7 +71,7 @@ const dummyCategories = [
   },
   {
     id: 4,
-    productName: "Wool Blend Sweater",
+    productName: "Shirt-Black",
     description: "Cozy wool blend sweater perfect for cold weather styling.",
     image: categoryImage,
     productId: "1143",
@@ -85,7 +85,7 @@ const dummyCategories = [
   },
   {
     id: 5,
-    productName: "Casual Chino Pants",
+    productName: "Shirt-Black",
     description:
       "Versatile chino pants suitable for both casual and semi-formal occasions.",
     image: categoryImage,
@@ -100,7 +100,7 @@ const dummyCategories = [
   },
   {
     id: 6,
-    productName: "Athletic Performance Shorts",
+    productName: "Shirt-Black",
     description: "High-performance shorts with moisture-wicking technology.",
     image: categoryImage,
     productId: "1145",
@@ -114,7 +114,7 @@ const dummyCategories = [
   },
   {
     id: 7,
-    productName: "Formal Dress Shirt",
+    productName: "Shirt-Black",
     description:
       "Crisp formal shirt with professional styling and wrinkle-resistant fabric.",
     image: categoryImage,
@@ -209,31 +209,31 @@ const ProductList = () => {
           <Table className="w-full">
             <TableHeader>
               <TableRow className="border-b border-gray-200">
-                <TableHead className="text-left py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-80">
+                <TableHead className="text-left py-4 font-bold text-black text-base uppercase leading-[120%] w-80">
                   Product Name
                 </TableHead>
-                <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-24">
+                <TableHead className="text-center py-4 font-bold text-black text-base uppercase leading-[120%] w-24">
                   ID
                 </TableHead>
-                <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-24">
+                <TableHead className="text-center py-4 font-bold text-black text-base uppercase leading-[120%] w-24">
                   MSRP
                 </TableHead>
-                <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-20">
+                <TableHead className="text-center py-4 font-bold text-black text-base uppercase leading-[120%] w-20">
                   MOQ
                 </TableHead>
-                <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-24">
+                <TableHead className="text-center py-4 font-bold text-black text-base uppercase leading-[120%] w-24">
                   Unit Price
                 </TableHead>
-                <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-24">
+                <TableHead className="text-center py-4 font-bold text-black text-base uppercase leading-[120%] w-24">
                   Pack Price
                 </TableHead>
-                <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-20">
+                <TableHead className="text-center py-4 font-bold text-black text-base uppercase leading-[120%] w-20">
                   Quantity
                 </TableHead>
-                <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-40">
+                <TableHead className="text-center py-4 font-bold text-black text-base uppercase leading-[120%] w-40">
                   Date Added
                 </TableHead>
-                <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-28">
+                <TableHead className="text-center py-4 font-bold text-black text-base uppercase leading-[120%] w-28">
                   Actions
                 </TableHead>
               </TableRow>
@@ -249,8 +249,8 @@ const ProductList = () => {
                         <Image
                           src={product.image}
                           alt={product.productName}
-                          width={56}
-                          height={56}
+                          width={100}
+                          height={100}
                           className="rounded-lg object-cover border border-gray-200"
                         />
                       </div>
@@ -258,44 +258,44 @@ const ProductList = () => {
                         <p className="font-semibold text-gray-900 text-sm mb-1 truncate">
                           {product.productName}
                         </p>
-                        <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
+                        {/* <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
                           {product.description}
-                        </p>
+                        </p> */}
                       </div>
                     </div>
                   </TableCell>
 
                   {/* Product ID Column */}
                   <TableCell className="text-center px-4 py-4">
-                    <span className="text-sm font-medium text-gray-900 bg-gray-100 px-2 py-1 rounded">
+                    <span className="text-base font-normal text-[#424242] px-2 py-1">
                       #{product.productId}
                     </span>
                   </TableCell>
 
                   {/* MSRP Column */}
                   <TableCell className="text-center px-4 py-4">
-                    <span className="text-sm font-bold text-gray-900">
+                    <span className="text-base font-normal text-[#424242] px-2 py-1">
                       {product.msrp}
                     </span>
                   </TableCell>
 
                   {/* MOQ Column */}
                   <TableCell className="text-center px-4 py-4">
-                    <span className="text-sm text-gray-700 bg-blue-50 px-2 py-1 rounded">
+                    <span className="text-base font-normal text-[#424242] px-2 py-1">
                       {product.moq}
                     </span>
                   </TableCell>
 
                   {/* Unit Price Column */}
                   <TableCell className="text-center px-4 py-4">
-                    <span className="text-sm font-bold text-green-600">
+                    <span className="text-base font-normal text-[#424242] px-2 py-1">
                       {product.unitPrice}
                     </span>
                   </TableCell>
 
                   {/* Pack Price Column */}
                   <TableCell className="text-center px-4 py-4">
-                    <span className="text-sm text-gray-700">
+                    <span className="text-base font-normal text-[#424242]">
                       {product.packPrice}
                     </span>
                   </TableCell>
@@ -308,7 +308,7 @@ const ProductList = () => {
                   {/* Date Column */}
                   <TableCell className="text-center px-4 py-4">
                     <div className="text-xs">
-                      <div className="text-gray-900 font-medium">
+                      <div className="text-base font-normal text-[#424242] px-2 py-1">
                         {product.date.split(" ")[0]}
                       </div>
                       <div className="text-gray-500">
@@ -357,7 +357,7 @@ const ProductList = () => {
         </div>
 
         {/* Pagination */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-6 py-4 bg-gray-50 border-t border-gray-200">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-6 py-4 border-t border-gray-200">
           <div className="mb-2 sm:mb-0">
             <p className="text-sm text-gray-600">
               Showing{" "}
