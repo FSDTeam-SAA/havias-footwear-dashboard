@@ -47,7 +47,7 @@ const RevenueList = () => {
               Dashboard
             </Link>
             <span className="text-gray-400">›</span>
-            <span className="text-gray-500 text-base">Products</span>
+            <span className="text-gray-500 text-base">Revenue from Seller </span>
           </div>
         </div>
 

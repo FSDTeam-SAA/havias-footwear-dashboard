@@ -173,7 +173,7 @@ export default function EditBlog() {
                     alt="Thumbnail preview"
                     width={400}
                     height={400}
-                    className="w-full h-48 object-cover rounded-lg border"
+                    className="w-full h-[380px] object-cover rounded-lg border"
                   />
                   <button
                     onClick={handleRemoveImage}
