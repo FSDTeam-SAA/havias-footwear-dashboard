@@ -165,7 +165,7 @@ const BlogList = () => {
                           {product.description}
                         </p>
                       </div>
-                    </div>
+                    </div>                                                                                                                                          
                   </TableCell>
 
                   {/* Product ID Column */}
