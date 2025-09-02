@@ -38,7 +38,7 @@ const CategoryList = () => {
   return (
     <div className="">
       {/* Header */}
-      <div className="px-6 py-5 ">
+      <div className="">
         <div className="flex justify-between w-full">
           <Title title='Categories List' active='Dashboard > Categories > List' />
           <Link href={"/categories/add-categories"}>
@@ -50,11 +50,11 @@ const CategoryList = () => {
       </div>
 
       {/* Table */}
-      <div className="w-full overflow-x-auto">
+      <div className="w-full overflow-x-auto mt-8">
         <Table className="w-full">
           <TableHeader>
             <TableRow className="border-b border-gray-200">
-              <TableHead className="text-left px-6 py-4 font-medium text-[18px] text-[#1C2228]  uppercase tracking-wide w-80">
+              <TableHead className="text-left font-medium text-[18px] text-[#1C2228]  uppercase tracking-wide w-80">
                 Name
               </TableHead>
               <TableHead className="text-center px-4 py-4 font-medium text-[18px] text-[#1C2228] uppercase tracking-wide w-40">
@@ -69,7 +69,7 @@ const CategoryList = () => {
             {paginatedCategories.map((category) => (
               <TableRow key={category.id}>
                 {/* Name */}
-                <TableCell className="px-6 py-4">
+                <TableCell className="">
                   <span className="text-[16px] font-normal text-[#595959]">{category.name}</span>
                 </TableCell>
 
