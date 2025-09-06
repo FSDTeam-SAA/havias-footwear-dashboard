@@ -22,16 +22,16 @@ import Image from "next/image";
 // import logoImage from "@/public/images/logo.svg";
 
 const navigation = [
-  { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Categories", href: "/categories", icon: Columns3Cog },
-  { name: "Product", href: "/product", icon: Grip },
-  { name: "Request Product", href: "/request-product", icon: ShoppingBasket }, 
-  { name: "Revenue from Seller ", href: "/revenue  ", icon: DollarSign },
-  { name: "Blog management", href: "/blog", icon: AppWindow },
-  { name: "Seller Management", href: "/seller-management", icon: User2 },
-  { name: "Seller Profile Request ", href: "/seller-profile-request", icon: UserCheck },
-  { name: "Buyer Profile ", href: "/buyer-profile", icon: Users },
-  { name: "Setting ", href: "/setting", icon: Settings },
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Categories", href: "/dashboard/categories", icon: Columns3Cog },
+  { name: "Product", href: "/dashboard/product", icon: Grip },
+  { name: "Request Product", href: "/dashboard/request-product", icon: ShoppingBasket },
+  { name: "Revenue from Seller ", href: "/dashboard/revenue  ", icon: DollarSign },
+  { name: "Blog management", href: "/dashboard/blog", icon: AppWindow },
+  { name: "Seller Management", href: "/dashboard/seller-management", icon: User2 },
+  { name: "Seller Profile Request ", href: "/dashboard/seller-profile-request", icon: UserCheck },
+  { name: "Buyer Profile ", href: "/dashboard/buyer-profile", icon: Users },
+  { name: "Setting ", href: "/dashboard/setting", icon: Settings },
 
 ];
 
