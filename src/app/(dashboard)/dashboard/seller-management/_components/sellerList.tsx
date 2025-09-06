@@ -23,7 +23,7 @@ import {
 import { Eye, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
-// Dummy Users Data
+
 const dummyUsers = [
     {
         id: 1,
@@ -134,7 +134,7 @@ const SellerList = () => {
 
     const totalPages = Math.ceil(dummyUsers.length / itemsPerPage);
 
-    // ✅ Pagination logic
+
     const handlePageChange = (page: number) => {
         if (page >= 1 && page <= totalPages) {
             setCurrentPage(page);
