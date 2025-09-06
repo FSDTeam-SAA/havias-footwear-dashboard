@@ -1,9 +1,9 @@
 import { Card, CardContent } from '@/components/ui/card'
 import React from 'react'
-import icon1 from "../../../public/images/icon1.png"
-import icon2 from "../../../public/images/icon2.png"
-import icon3 from "../../../public/images/icon3.png"
-import icon4 from "../../../public/images/icon4.png"
+import icon1 from "../../../../public/images/icon1.png"
+import icon2 from "../../../../public/images/icon2.png"
+import icon3 from "../../../../public/images/icon3.png"
+import icon4 from "../../../../public/images/icon4.png"
 import Image from 'next/image'
 
 const OverviewCard = () => {
