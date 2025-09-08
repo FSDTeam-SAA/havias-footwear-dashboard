@@ -323,6 +323,7 @@ export default function ProfilePage() {
         },
         enabled: !!token,
     });
+    
     console.log(isLoading)
     // Populate form with API data
     useEffect(() => {

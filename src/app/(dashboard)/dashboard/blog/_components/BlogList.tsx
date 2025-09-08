@@ -14,6 +14,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Link from "next/link";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
+import { BlogsResponse } from "../../../../../../types/blogDataType";
+import { toast } from "sonner";
 // Fixed and consistent dummy data
 const dummyCategories = [
   {
@@ -75,14 +79,77 @@ const dummyCategories = [
 ];
 
 const BlogList = () => {
-  const itemsPerPage = 7;
+  const itemsPerPage = 10;
   const [currentPage, setCurrentPage] = useState(1);
-
   const totalPages = Math.ceil(dummyCategories.length / itemsPerPage);
-  const paginatedCategories = dummyCategories.slice(
+  const session = useSession();
+
+  const token = (session?.data?.user as { accessToken: string })?.accessToken;
+
+
+  const { data, isLoading } = useQuery<BlogsResponse>({
+    queryKey: ["blog"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/blog/all-blogs`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (!res.ok) throw new Error("Failed to fetch user");
+      return res.json();
+    },
+    enabled: !!token,
+  });
+
+  console.log(isLoading)
+
+  const blogs = data?.data || [];
+
+
+  const blogDeleteMutation = useMutation({
+    mutationFn: async (data: { id: string }) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/blog/${data.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to delete blog");
+      }
+
+      return res.json();
+    },
+    onSuccess: (data) => {
+      console.log(data);
+      toast.success(data.message || "Blog deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to delete blog");
+    },
+  });
+
+
+  const handleDelete = ({ id }: { id: string }) => {
+    blogDeleteMutation.mutate({ id });
+  }
+
+
+  const paginatedCategories = blogs.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -115,7 +182,7 @@ const BlogList = () => {
               size="sm"
               className="bg-[#797068] hover:bg-[#3a3129] text-white text-base h-[50px] px-6"
             >
-              <Link href="/blog/add" className="flex items-center">
+              <Link href="/dashboard/blog/add" className="flex items-center">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Blog
               </Link>
@@ -134,7 +201,7 @@ const BlogList = () => {
                   Blog Name
                 </TableHead>
                 <TableHead className="text-center py-4 font-bold text-[#131313] text-base uppercase leading-[120%] w-24">
-                 Added
+                  Added
                 </TableHead>
                 <TableHead className="text-center py-4 font-bold text-[#131313] text-base uppercase leading-[120%] w-28">
                   Actions
@@ -143,15 +210,15 @@ const BlogList = () => {
             </TableHeader>
 
             <TableBody>
-              {paginatedCategories.map((product) => (
-                <TableRow key={product.id} className="">
+              {paginatedCategories.map((blog) => (
+                <TableRow key={blog._id} className="">
                   {/* Product Name Column */}
                   <TableCell className=" py-4">
                     <div className="flex items-center space-x-4">
                       <div className="flex-shrink-0">
                         <Image
-                          src={product.image}
-                          alt={product.productName}
+                          src={blog.thumbnail}
+                          alt={blog.title.slice(0, 10)}
                           width={100}
                           height={100}
                           className="rounded-lg object-cover border border-gray-200"
@@ -159,26 +226,23 @@ const BlogList = () => {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="font-semibold text-[#272727] text-sm mb-1 truncate">
-                          {product.productName}
-                        </p>
-                        <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
-                          {product.description}
+                          {blog.title}
                         </p>
                       </div>
-                    </div>                                                                                                                                          
+                    </div>
                   </TableCell>
 
                   {/* Product ID Column */}
                   <TableCell className="text-center px-4 py-4">
                     <span className="text-base font-medium text-[]  px-2 py-1 rounded">
-                      {product.date}
+                      {blog.createdAt}
                     </span>
                   </TableCell>
 
                   {/* Actions Column */}
                   <TableCell className="text-center px-4 py-4">
                     <div className="flex justify-center items-center gap-2">
-                      <Link href={`/blog/edit/${product.id}`}>
+                      <Link href={`/dashboard/blog/edit/${blog._id}`}>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -196,11 +260,11 @@ const BlogList = () => {
                         onClick={() => {
                           if (
                             confirm(
-                              `Are you sure you want to delete "${product.productName}"?`
+                              `Are you sure you want to delete "${blog._id}"?`
                             )
                           ) {
                             // Handle delete logic here
-                            console.log("Delete product:", product.id);
+                            handleDelete({ id: blog._id });
                           }
                         }}
                       >
@@ -248,11 +312,10 @@ const BlogList = () => {
                 size="sm"
                 onClick={() => handlePageChange(page)}
                 variant={currentPage === page ? "default" : "outline"}
-                className={`h-9 w-9 p-0 ${
-                  currentPage === page
-                    ? "bg-gray-800 text-white hover:bg-gray-900"
-                    : "border-gray-300 hover:bg-gray-50"
-                }`}
+                className={`h-9 w-9 p-0 ${currentPage === page
+                  ? "bg-gray-800 text-white hover:bg-gray-900"
+                  : "border-gray-300 hover:bg-gray-50"
+                  }`}
               >
                 {page}
               </Button>

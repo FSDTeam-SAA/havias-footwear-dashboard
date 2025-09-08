@@ -1,10 +1,12 @@
+
+
 "use client";
 
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChevronRight, X, ImageDown, Save } from "lucide-react";
+import { ChevronRight, X, ImageDown, Loader2 } from "lucide-react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { Label } from "@/components/ui/label";
@@ -19,6 +21,9 @@ const ReactQuill = dynamic(() => import("react-quill"), {
 
 // Import ReactQuill styles
 import "react-quill/dist/quill.snow.css";
+import { toast } from "sonner";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
 
 export default function AddBlog() {
   const [title, setTitle] = useState<string>("");
@@ -26,7 +31,10 @@ export default function AddBlog() {
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-
+  const descriptionImageInputRef = useRef<HTMLInputElement | null>(null);
+  const session = useSession();
+  const token = (session?.data?.user as { accessToken: string })?.accessToken;
+  const queryClient = useQueryClient();
   const quillModules = {
     toolbar: [
       [{ header: [1, 2, false] }],
@@ -34,7 +42,7 @@ export default function AddBlog() {
       ["bold", "italic", "underline"],
       [{ align: [] }],
       [{ list: "ordered" }, { list: "bullet" }],
-      ["code-block"],
+      ["image"],
     ],
   };
 
@@ -47,27 +55,73 @@ export default function AddBlog() {
     "align",
     "list",
     "bullet",
-    "code-block",
+    "image",
   ];
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/"))
+      return toast.error("Please select an image file");
+    if (file.size > 5 * 1024 * 1024)
+      return toast.error("File size should be less than 5MB");
+
+    setThumbnail(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => setThumbnailPreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const handleDescriptionImageUpload = () => {
+    const input = descriptionImageInputRef.current;
+    if (!input) return;
+
+    input.click();
+  };
+
+  const handleDescriptionImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const readerPromises = Array.from(files).map((file) => {
       if (!file.type.startsWith("image/")) {
-        alert("Please select an image file");
-        return;
+        toast.error("Please select an image file");
+        return Promise.resolve();
       }
       if (file.size > 5 * 1024 * 1024) {
-        alert("File size should be less than 5MB");
-        return;
+        toast.error("File size should be less than 5MB");
+        return Promise.resolve();
       }
-      setThumbnail(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setThumbnailPreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const imageUrl = ev.target?.result as string;
+          const quill = document.querySelector(".ql-editor") as HTMLElement;
+          if (quill) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const range = (window as any).Quill?.find(quill)?.getSelection();
+            if (range) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (quill as any).children[0].focus();
+              setTimeout(() => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (window as any).Quill?.find(quill)?.insertEmbed(range.index, "image", imageUrl);
+              }, 0);
+            }
+          }
+          resolve(imageUrl);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    Promise.all(readerPromises).then(() => {
+      if (descriptionImageInputRef.current) {
+        descriptionImageInputRef.current.value = "";
+      }
+    });
   };
 
   const handleUploadClick = () => {
@@ -82,9 +136,43 @@ export default function AddBlog() {
     }
   };
 
+  // Blog submission
+  const addBlogMutation = useMutation({
+    mutationFn: async () => {
+      if (!title || !description || !thumbnail) throw new Error("All fields are required");
+
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("description", description);
+      formData.append("thumbnail", thumbnail);
+
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/blog`, {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to add blog");
+      return data;
+    },
+    onSuccess: (data) => {
+      toast.success(data.message || "Blog added successfully");
+      queryClient.invalidateQueries({ queryKey: ["blog"] });
+      setTitle("");
+      setDescription("");
+
+      handleRemoveImage();
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Failed to add blog");
+    },
+  });
+
   const handleSave = () => {
     const blogData = { title, description, thumbnail };
     console.log("Saving blog:", blogData);
+    addBlogMutation.mutate();
   };
 
   return (
@@ -105,10 +193,10 @@ export default function AddBlog() {
         </div>
         <Button
           onClick={handleSave}
+          disabled={addBlogMutation.isPending}
           className="bg-gray-700 text-base h-[50px] hover:bg-gray-800 text-white px-6"
         >
-          <Save size={20} className="" />
-          Save Blog
+          Save Blog {addBlogMutation.isPending && <Loader2 className="animate-spin" />}
         </Button>
       </div>
 
@@ -146,6 +234,20 @@ export default function AddBlog() {
                   formats={quillFormats}
                   className="h-[250px]"
                 />
+                <input
+                  type="file"
+                  ref={descriptionImageInputRef}
+                  onChange={handleDescriptionImageSelect}
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                />
+                <Button
+                  onClick={handleDescriptionImageUpload}
+                  className="mt-2 bg-blue-500 text-white hover:bg-blue-600"
+                >
+                  Add Image to Description
+                </Button>
               </div>
             </CardContent>
           </Card>

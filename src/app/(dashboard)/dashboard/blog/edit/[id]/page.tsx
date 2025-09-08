@@ -1,10 +1,10 @@
 import React from 'react'
 import EditBlog from '../../_components/EditBlog'
 
-function page() {
+function page({params}:{params:{id:string}}) {
   return (
     <div>
-        <EditBlog />
+        <EditBlog id={params.id} />
     </div>
   )
 }

@@ -39,10 +39,10 @@ const Setting = () => {
                             <h2 className='text-[#1F2937] font-medium'>Change Password</h2>
                             <ChevronRight />
                         </div>
-                        <div className='flex border border-[#BABABA] cursor-pointer rounded-md py-[18px] px-4  justify-between items-center'>
+                        {/* <div className='flex border border-[#BABABA] cursor-pointer rounded-md py-[18px] px-4  justify-between items-center'>
                             <h2 className='text-[#1F2937] font-medium'>Login Image control</h2>
                             <ChevronRight />
-                        </div>
+                        </div> */}
                     </CardContent>
                 </div>
                 <ChangePasswordModal isOpen={isOpen} onClose={() => setIsOpen(false)} />

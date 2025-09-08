@@ -11,139 +11,126 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-    DialogFooter,
-} from "@/components/ui/dialog";
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { useSession } from "next-auth/react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { SellersResponse } from "../../../../../../types/sellersDataType";
+import SingelSellersProfile from "./singelSellersProfile";
 import { Eye, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-// Dummy Users Data
-const dummyUsers = [
-    {
-        id: 1,
-        name: "John Doe",
-        email: "john@example.com",
-        avatar: "https://i.pravatar.cc/150?img=1",
-        totalOrder: 25,
-        deliveredOrder: 20,
-        pendingOrder: 3,
-        cancelOrder: 2,
-        deliveryDate: "2025-08-01",
-    },
-    {
-        id: 8,
-        name: "John Doe",
-        email: "john@example.com",
-        avatar: "https://i.pravatar.cc/150?img=1",
-        totalOrder: 25,
-        deliveredOrder: 20,
-        pendingOrder: 3,
-        cancelOrder: 2,
-        deliveryDate: "2025-08-01",
-    },
-    {
-        id: 7,
-        name: "John Doe",
-        email: "john@example.com",
-        avatar: "https://i.pravatar.cc/150?img=1",
-        totalOrder: 25,
-        deliveredOrder: 20,
-        pendingOrder: 3,
-        cancelOrder: 2,
-        deliveryDate: "2025-08-01",
-    },
-    {
-        id: 6,
-        name: "John Doe",
-        email: "john@example.com",
-        avatar: "https://i.pravatar.cc/150?img=1",
-        totalOrder: 25,
-        deliveredOrder: 20,
-        pendingOrder: 3,
-        cancelOrder: 2,
-        deliveryDate: "2025-08-01",
-    },
-    {
-        id: 5,
-        name: "John Doe",
-        email: "john@example.com",
-        avatar: "https://i.pravatar.cc/150?img=1",
-        totalOrder: 25,
-        deliveredOrder: 20,
-        pendingOrder: 3,
-        cancelOrder: 2,
-        deliveryDate: "2025-08-01",
-    },
-    {
-        id: 4,
-        name: "John Doe",
-        email: "john@example.com",
-        avatar: "https://i.pravatar.cc/150?img=1",
-        totalOrder: 25,
-        deliveredOrder: 20,
-        pendingOrder: 3,
-        cancelOrder: 2,
-        deliveryDate: "2025-08-01",
-    },
-    {
-        id: 2,
-        name: "Sarah Smith",
-        email: "sarah@example.com",
-        avatar: "https://i.pravatar.cc/150?img=2",
-        totalOrder: 40,
-        deliveredOrder: 38,
-        pendingOrder: 1,
-        cancelOrder: 1,
-        deliveryDate: "2025-08-12",
-    },
-];
-
-type User = {
-    id: number;
-    name: string;
-    email: string;
-    avatar: string;
-    totalOrder: number;
-    deliveredOrder: number;
-    pendingOrder: number;
-    cancelOrder: number;
-    deliveryDate: string;
-};
+import { toast } from "sonner";
 
 const ListOfProfile = () => {
     const itemsPerPage = 7;
     const [currentPage, setCurrentPage] = useState(1);
-    const [selectedUser, setSelectedUser] = useState<User | null>(null);
+    const [selectedSellerId, setSelectedSellerId] = useState<string | null>(null);
+    const [open, setOpen] = useState(false);
 
-    const totalPages = Math.ceil(dummyUsers.length / itemsPerPage);
+    const session = useSession();
+    const token = (session?.data?.user as { accessToken: string })?.accessToken;
+    const queryClient = useQueryClient();
 
-    // ✅ Fix: pagination handler
-    const handlePageChange = (page: number) => {
-        if (page >= 1 && page <= totalPages) {
-            setCurrentPage(page);
-        }
-    };
+    // Fetch all sellers
+    const { data } = useQuery<SellersResponse>({
+        queryKey: ["sellers"],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/seller`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (!res.ok) throw new Error("Failed to fetch sellers");
+            return res.json();
+        },
+        enabled: !!token,
+    });
 
-    const paginatedUsers = dummyUsers.slice(
+    const sellers = data?.data.data || [];
+    const totalPages = Math.ceil(sellers.length / itemsPerPage);
+    const paginatedSellers = sellers.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     );
 
+    // Mutation to update status
+    const statusMutation = useMutation({
+        mutationFn: async ({ sellerId, approve }: { sellerId: string; approve: boolean }) => {
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/seller/${sellerId}/approve`,
+                {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ approve: approve }),
+                }
+            );
+            const resData = await res.json();
+            if (!res.ok) throw new Error(resData.message || "Failed to update status");
+            return resData;
+        },
+        onSuccess: (_, { sellerId, approve }) => {
+            toast.success(`Seller ${approve ? "Approved" : "Rejected"} successfully`);
+            // Update UI instantly
+            queryClient.setQueryData<SellersResponse>(["sellers"], (oldData) => {
+                if (!oldData) return oldData;
+                const updatedData = oldData.data.data.map((s) =>
+                    s._id === sellerId ? { ...s, isApproved: approve } : s
+                );
+                return { ...oldData, data: { ...oldData.data, data: updatedData } };
+            });
+        },
+        onError: (error) => {
+            toast.error(error.message || "Failed to update status");
+        },
+    });
+
+    // Mutation to delete seller
+    const deleteSellerMutation = useMutation({
+        mutationFn: async (sellerId: string) => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/seller/${sellerId}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const resData = await res.json();
+            if (!res.ok) throw new Error(resData.message || "Failed to delete seller");
+            return resData;
+        },
+        onSuccess: (_, sellerId) => {
+            toast.success("Seller deleted successfully");
+            // Remove from UI instantly
+            queryClient.setQueryData<SellersResponse>(["sellers"], (oldData) => {
+                if (!oldData) return oldData;
+                const filtered = oldData.data.data.filter((s) => s._id !== sellerId);
+                return { ...oldData, data: { ...oldData.data, data: filtered } };
+            });
+        },
+        onError: (error) => {
+            toast.error(error.message || "Failed to delete seller");
+        },
+    });
+
+    const handlePageChange = (page: number) => {
+        if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    };
+
     return (
         <div>
             {/* Header Section */}
-            <div className=" flex justify-between  pb-7">
+            <div className="flex justify-between pb-7">
                 <div>
-                    <h1 className="text-2xl font-bold text-[#595959] mb-1">
-                        Seller Profile Request
-                    </h1>
+                    <h1 className="text-2xl font-bold text-[#595959] mb-1">Seller Profile Request</h1>
                     <div className="flex items-center space-x-2 text-sm">
                         <Link
                             href="/dashboard"
@@ -158,8 +145,8 @@ const ListOfProfile = () => {
 
                 <Card>
                     <CardContent className="bg-[#797068] flex flex-col items-center rounded-md py-3 px-6">
-                        <h1 className="text-[#F4F4F4] font-medium text-[20px]">Total Request </h1>
-                        <p className="text-[#FFFFFF] font-normal text-[16px]">4,200.00</p>
+                        <h1 className="text-[#F4F4F4] font-medium text-[20px]">Total Request</h1>
+                        <p className="text-[#FFFFFF] font-normal text-[16px]">{sellers.length}</p>
                     </CardContent>
                 </Card>
             </div>
@@ -169,12 +156,15 @@ const ListOfProfile = () => {
                 <div className="overflow-x-auto">
                     <Table className="w-full">
                         <TableHeader>
-                            <TableRow className="border-b border-t border-[#B6B6B6] ">
+                            <TableRow className="border-b border-t border-[#B6B6B6]">
                                 <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-40">
                                     Seller Id
                                 </TableHead>
                                 <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-40">
                                     Seller Name
+                                </TableHead>
+                                <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-40">
+                                    Status
                                 </TableHead>
                                 <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-40">
                                     Action
@@ -183,55 +173,53 @@ const ListOfProfile = () => {
                         </TableHeader>
 
                         <TableBody>
-                            {paginatedUsers.map((user) => (
-                                <TableRow key={user.id} className="border-[#B6B6B6]">
+                            {paginatedSellers.map((seller) => (
+                                <TableRow key={seller._id} className="border-[#B6B6B6]">
                                     <TableCell className="text-center text-sm font-medium text-[#595959]">
-                                        {user.id}
+                                        {seller._id}
                                     </TableCell>
                                     <TableCell className="py-4 flex justify-center">
-                                        <div className="flex items-center gap-3">
-                                            <Avatar className="h-10 w-10">
-                                                <AvatarImage src={user.avatar} alt={user.name} />
-                                                <AvatarFallback>
-                                                    {user.name.charAt(0).toUpperCase()}
-                                                </AvatarFallback>
-                                            </Avatar>
-                                            <p className="text-[#595959] text-[16px] font-medium">
-                                                {user.name}
-                                            </p>
-                                        </div>
+                                        <p className="text-[#595959] text-[16px] font-medium">{seller.userId.name}</p>
+                                    </TableCell>
+                                    <TableCell className="text-center py-4 text-sm font-medium">
+                                        {seller.isApproved ? "Approved" : "Rejected"}
                                     </TableCell>
                                     <TableCell className="text-center px-4 py-4">
                                         <div className="flex justify-center items-center gap-2">
-                                            {/* Dropdown */}
-                                            <Select onValueChange={(value) => console.log("Selected:", value)}>
+                                            <Select
+                                                onValueChange={(value) =>
+                                                    statusMutation.mutate({ sellerId: seller._id, approve: value === "true" })
+                                                }
+                                            >
                                                 <SelectTrigger className="w-[120px] border-none shadow-none rounded-full h-8">
                                                     <SelectValue placeholder="Action" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="approve">Approve</SelectItem>
-                                                    <SelectItem value="reject">Reject</SelectItem>
+                                                    <SelectItem value="true">Approve</SelectItem>
+                                                    <SelectItem value="false">Reject</SelectItem>
                                                 </SelectContent>
                                             </Select>
 
-                                            {/* View */}
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
                                                 className="h-8 px-2 hover:bg-blue-100 hover:text-blue-600 transition-colors"
                                                 title="View Details"
-                                                onClick={() => setSelectedUser(user)}
+                                                onClick={() => {
+                                                    setSelectedSellerId(seller._id);
+                                                    setOpen(true);
+                                                }}
                                             >
                                                 <Eye className="w-4 h-4 mr-1" />
                                                 View
                                             </Button>
 
-                                            {/* Delete */}
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
                                                 className="h-8 px-2 hover:bg-red-50 hover:text-red-600 transition-colors"
                                                 title="Delete User"
+                                                onClick={() => deleteSellerMutation.mutate(seller._id)}
                                             >
                                                 <Trash2 className="w-4 h-4 mr-1" />
                                             </Button>
@@ -243,24 +231,17 @@ const ListOfProfile = () => {
                     </Table>
                 </div>
 
-                {/* ✅ Fixed Pagination */}
+                {/* Pagination */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-6 py-4 bg-gray-50 border-t border-gray-200">
                     <div className="mb-2 sm:mb-0">
                         <p className="text-sm text-gray-600">
-                            Showing{" "}
-                            <span className="font-medium">
-                                {(currentPage - 1) * itemsPerPage + 1}
-                            </span>{" "}
-                            to{" "}
-                            <span className="font-medium">
-                                {Math.min(currentPage * itemsPerPage, dummyUsers.length)}
-                            </span>{" "}
-                            of <span className="font-medium">{dummyUsers.length}</span> results
+                            Showing <span className="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span> to{" "}
+                            <span className="font-medium">{Math.min(currentPage * itemsPerPage, sellers.length)}</span>{" "}
+                            of <span className="font-medium">{sellers.length}</span> results
                         </p>
                     </div>
 
                     <div className="flex items-center space-x-2">
-                        {/* Previous */}
                         <Button
                             variant="outline"
                             size="sm"
@@ -271,7 +252,6 @@ const ListOfProfile = () => {
                             ‹
                         </Button>
 
-                        {/* Page Numbers */}
                         {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                             <Button
                                 key={page}
@@ -287,7 +267,6 @@ const ListOfProfile = () => {
                             </Button>
                         ))}
 
-                        {/* Next */}
                         <Button
                             variant="outline"
                             size="sm"
@@ -302,53 +281,7 @@ const ListOfProfile = () => {
             </div>
 
             {/* Modal */}
-            <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
-                <DialogContent className="sm:max-w-md">
-                    {selectedUser && (
-                        <>
-                            <DialogHeader>
-                                <DialogTitle>Buyer Details</DialogTitle>
-                                <DialogDescription>
-                                    Full information about this buyer
-                                </DialogDescription>
-                            </DialogHeader>
-                            <div className="flex items-center gap-4 py-4">
-                                <Avatar className="h-16 w-16">
-                                    <AvatarImage
-                                        src={selectedUser.avatar}
-                                        alt={selectedUser.name}
-                                    />
-                                    <AvatarFallback>
-                                        {selectedUser.name.charAt(0).toUpperCase()}
-                                    </AvatarFallback>
-                                </Avatar>
-                                <div>
-                                    <p className="text-lg font-semibold">{selectedUser.name}</p>
-                                    <p className="text-sm text-gray-500">ID: {selectedUser.id}</p>
-                                </div>
-                            </div>
-                            <div className="space-y-2 text-sm">
-                                <p>
-                                    <span className="font-medium">Email:</span> {selectedUser.email}
-                                </p>
-                                <p>
-                                    <span className="font-medium">Total Orders:</span>{" "}
-                                    {selectedUser.totalOrder}
-                                </p>
-                                <p>
-                                    <span className="font-medium">Delivery Date:</span>{" "}
-                                    {selectedUser.deliveryDate}
-                                </p>
-                            </div>
-                            <DialogFooter>
-                                <Button variant="secondary" onClick={() => setSelectedUser(null)}>
-                                    Close
-                                </Button>
-                            </DialogFooter>
-                        </>
-                    )}
-                </DialogContent>
-            </Dialog>
+            <SingelSellersProfile id={selectedSellerId} open={open} openChange={setOpen} />
         </div>
     );
 };
