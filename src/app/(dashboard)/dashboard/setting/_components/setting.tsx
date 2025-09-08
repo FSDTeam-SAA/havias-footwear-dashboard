@@ -29,7 +29,7 @@ const Setting = () => {
                         </div>
                     </CardTitle>
                     <CardContent className='p-0 space-y-5'>
-                        <Link href={"/setting/personal-info"}>
+                        <Link href={"/dashboard/setting/personal-info"}>
                             <div className='flex border border-[#BABABA] rounded-md py-[18px] px-4  justify-between items-center'>
                                 <h2 className='text-[#1F2937] font-medium'>Personal Information</h2>
                                 <ChevronRight />
