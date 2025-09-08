@@ -11,104 +11,49 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-    DialogFooter,
-} from "@/components/ui/dialog";
 import { Eye } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-
-// Dummy Users Data
-const dummyUsers = [
-    {
-        id: 1,
-        name: "John Doe",
-        email: "john@example.com",
-        avatar: "https://i.pravatar.cc/150?img=1",
-        totalOrder: 25,
-        deliveredOrder: 20,
-        pendingOrder: 3,
-        cancelOrder: 2,
-        deliveryDate: "2025-08-01",
-    },
-    {
-        id: 2,
-        name: "Sarah Smith",
-        email: "sarah@example.com",
-        avatar: "https://i.pravatar.cc/150?img=2",
-        totalOrder: 40,
-        deliveredOrder: 38,
-        pendingOrder: 1,
-        cancelOrder: 1,
-        deliveryDate: "2025-08-12",
-    },
-    {
-        id: 3,
-        name: "Michael Brown",
-        email: "michael@example.com",
-        avatar: "https://i.pravatar.cc/150?img=3",
-        totalOrder: 18,
-        deliveredOrder: 15,
-        pendingOrder: 2,
-        cancelOrder: 1,
-        deliveryDate: "2025-08-20",
-    },
-    {
-        id: 4,
-        name: "Emma Wilson",
-        email: "emma@example.com",
-        avatar: "https://i.pravatar.cc/150?img=4",
-        totalOrder: 30,
-        deliveredOrder: 28,
-        pendingOrder: 1,
-        cancelOrder: 1,
-        deliveryDate: "2025-08-25",
-    },
-    {
-        id: 5,
-        name: "Chris Johnson",
-        email: "chris@example.com",
-        avatar: "https://i.pravatar.cc/150?img=5",
-        totalOrder: 22,
-        deliveredOrder: 20,
-        pendingOrder: 1,
-        cancelOrder: 1,
-        deliveryDate: "2025-08-28",
-    },
-];
-
-type User = {
-    id: number;
-    name: string;
-    email: string;
-    avatar: string;
-    totalOrder: number;
-    deliveredOrder: number;
-    pendingOrder: number;
-    cancelOrder: number;
-    deliveryDate: string;
-};
+import { useQuery } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
+import { BuyerProfilesResponse } from "../../../../../../types/buyeresDataType";
+import BuyerDetails from "./buyerDetails";
 
 const BuyerList = () => {
     const itemsPerPage = 10;
     const [currentPage, setCurrentPage] = useState(1);
-    const [selectedUser, setSelectedUser] = useState<User | null>(null);
+    const session = useSession();
+    const token = (session?.data?.user as { accessToken: string })?.accessToken;
+    const [id, setId] = useState("");
+    const [open, setOpen] = useState(false);
 
-    const totalPages = Math.ceil(dummyUsers.length / itemsPerPage);
-
-    // Pagination handler
-    const handlePageChange = (page: number) => {
-        if (page >= 1 && page <= totalPages) {
-            setCurrentPage(page);
-        }
+    const openModal = (id: string) => {
+        setId(id);
+        setOpen(true);
     };
 
-    const paginatedUsers = dummyUsers.slice(
+    // Fetch buyers list
+    const { data, isLoading } = useQuery<BuyerProfilesResponse>({
+        queryKey: ["buyers"],
+        queryFn: async () => {
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/order/admin/buyers`,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            if (!res.ok) throw new Error("Failed to fetch buyers");
+            return res.json();
+        },
+        enabled: !!token,
+    });
+    console.log(isLoading)
+    const buyers = data?.data || [];
+    const totalPages = Math.ceil(buyers.length / itemsPerPage);
+
+    const paginatedUsers = buyers.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     );
@@ -137,7 +82,9 @@ const BuyerList = () => {
                         <h1 className="text-[#F4F4F4] font-medium text-[20px]">
                             Total User
                         </h1>
-                        <p className="text-[#FFFFFF] font-normal text-[16px]">4,200.00</p>
+                        <p className="text-[#FFFFFF] font-normal text-[16px]">
+                            {buyers.length}
+                        </p>
                     </CardContent>
                 </Card>
             </div>
@@ -159,35 +106,25 @@ const BuyerList = () => {
                         </TableHeader>
 
                         <TableBody>
-                            {paginatedUsers.map((user) => (
-                                <TableRow key={user.id} className="border-[#B6B6B6] border-b">
+                            {paginatedUsers.map((buyer) => (
+                                <TableRow key={buyer._id} className="border-[#B6B6B6] border-b">
                                     <TableCell className="text-center text-sm font-medium text-[#595959]">
-                                        {user.id}
-                                    </TableCell>
-                                    <TableCell className="py-4 flex justify-center">
-                                        <div className="flex items-center gap-3  ">
-                                            <Avatar className="h-10 w-10">
-                                                <AvatarImage src={user.avatar} alt={user.name} />
-                                                <AvatarFallback>
-                                                    {user.name.charAt(0).toUpperCase()}
-                                                </AvatarFallback>
-                                            </Avatar>
-                                            <p className="text-[#595959] text-[16px] font-medium">
-                                                {user.name.slice(0, 10)}
-                                            </p>
-                                        </div>
+                                        {buyer._id}
                                     </TableCell>
                                     <TableCell className="text-center text-sm font-medium text-[#595959]">
-                                        {user.totalOrder}
+                                        {buyer.userName}
+                                    </TableCell>
+                                    <TableCell className="text-center text-sm font-medium text-[#595959]">
+                                        {buyer.totalOrders}
                                     </TableCell>
                                     <TableCell className="text-center text-sm font-medium text-green-600">
-                                        {user.deliveredOrder}
+                                        {buyer.delivered}
                                     </TableCell>
                                     <TableCell className="text-center text-sm font-medium text-orange-600">
-                                        {user.pendingOrder}
+                                        {buyer.pending}
                                     </TableCell>
                                     <TableCell className="text-center text-sm font-medium text-red-600">
-                                        {user.cancelOrder}
+                                        {buyer.cancelled}
                                     </TableCell>
                                     <TableCell className="text-center px-4 py-4">
                                         <div className="flex justify-center items-center gap-2">
@@ -196,7 +133,7 @@ const BuyerList = () => {
                                                 size="sm"
                                                 className="h-8 px-2 hover:bg-blue-100 hover:text-blue-600"
                                                 title="View Details"
-                                                onClick={() => setSelectedUser(user)}
+                                                onClick={() => openModal(buyer._id)}
                                             >
                                                 <Eye className="w-4 h-4 mr-1" />
                                                 View
@@ -219,30 +156,28 @@ const BuyerList = () => {
                             </span>{" "}
                             to{" "}
                             <span className="font-medium">
-                                {Math.min(currentPage * itemsPerPage, dummyUsers.length)}
+                                {Math.min(currentPage * itemsPerPage, buyers.length)}
                             </span>{" "}
-                            of <span className="font-medium">{dummyUsers.length}</span> results
+                            of <span className="font-medium">{buyers.length}</span> results
                         </p>
                     </div>
 
                     <div className="flex items-center space-x-2">
-                        {/* Previous */}
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handlePageChange(currentPage - 1)}
+                            onClick={() => setCurrentPage(currentPage - 1)}
                             disabled={currentPage === 1}
                             className="h-9 w-9 p-0 border-gray-300 disabled:opacity-50"
                         >
                             ‹
                         </Button>
 
-                        {/* Page Numbers */}
                         {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                             <Button
                                 key={page}
                                 size="sm"
-                                onClick={() => handlePageChange(page)}
+                                onClick={() => setCurrentPage(page)}
                                 variant={currentPage === page ? "default" : "outline"}
                                 className={`h-9 w-9 p-0 ${currentPage === page
                                     ? "bg-gray-800 text-white hover:bg-gray-900"
@@ -253,11 +188,10 @@ const BuyerList = () => {
                             </Button>
                         ))}
 
-                        {/* Next */}
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handlePageChange(currentPage + 1)}
+                            onClick={() => setCurrentPage(currentPage + 1)}
                             disabled={currentPage === totalPages}
                             className="h-9 w-9 p-0 border-gray-300 disabled:opacity-50"
                         >
@@ -268,59 +202,7 @@ const BuyerList = () => {
             </div>
 
             {/* Buyer Details Modal */}
-            <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
-                <DialogContent className="sm:max-w-md">
-                    {selectedUser && (
-                        <>
-                            <DialogHeader>
-                                <DialogTitle>Buyer Details</DialogTitle>
-                                <DialogDescription>
-                                    Full information about this buyer
-                                </DialogDescription>
-                            </DialogHeader>
-
-                            <div className="flex items-center gap-4 py-4">
-                                <Avatar className="h-16 w-16">
-                                    <AvatarImage
-                                        src={selectedUser.avatar}
-                                        alt={selectedUser.name}
-                                    />
-                                    <AvatarFallback>
-                                        {selectedUser.name.charAt(0).toUpperCase()}
-                                    </AvatarFallback>
-                                </Avatar>
-                                <div>
-                                    <p className="text-lg font-semibold">{selectedUser.name}</p>
-                                    <p className="text-sm text-gray-500">
-                                        ID: {selectedUser.id}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="space-y-2 text-sm">
-                                <p>
-                                    <span className="font-medium">Email:</span>{" "}
-                                    {selectedUser.email}
-                                </p>
-                                <p>
-                                    <span className="font-medium">Total Orders:</span>{" "}
-                                    {selectedUser.totalOrder}
-                                </p>
-                                <p>
-                                    <span className="font-medium">Delivery Date:</span>{" "}
-                                    {selectedUser.deliveryDate}
-                                </p>
-                            </div>
-
-                            <DialogFooter>
-                                <Button variant="secondary" onClick={() => setSelectedUser(null)}>
-                                    Close
-                                </Button>
-                            </DialogFooter>
-                        </>
-                    )}
-                </DialogContent>
-            </Dialog>
+            <BuyerDetails id={id} open={open} openChange={setOpen} />
         </div>
     );
 };

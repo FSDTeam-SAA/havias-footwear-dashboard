@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,6 +8,9 @@ import { ChevronRight, X, ImageDown, Save } from "lucide-react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { Label } from "@/components/ui/label";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 
 // Dynamically import ReactQuill to avoid SSR issues
 const ReactQuill = dynamic(() => import("react-quill"), {
@@ -16,16 +19,56 @@ const ReactQuill = dynamic(() => import("react-quill"), {
     <div className="h-48 bg-gray-50 animate-pulse rounded-md"></div>
   ),
 });
-
-// Import ReactQuill styles
 import "react-quill/dist/quill.snow.css";
 
-export default function EditBlog() {
+interface BlogData {
+  _id: string;
+  title: string;
+  description: string;
+  thumbnail: string;
+}
+
+interface BlogResponse {
+  data: BlogData;
+}
+
+export default function EditBlog({ id }: { id: string }) {
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const session = useSession();
+  const token = (session?.data?.user as { accessToken?: string })?.accessToken;
+  const queryClient = useQueryClient();
+
+  // Fetch single blog data
+  const { data, isLoading } = useQuery<BlogResponse>({
+    queryKey: ["blog", id],
+    queryFn: async () => {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/blog/${id}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) throw new Error("Failed to fetch blog");
+      return res.json();
+    },
+    enabled: !!token,
+  });
+
+  console.log(isLoading)
+
+  // Pre-fill form when data is loaded
+  useEffect(() => {
+    if (data?.data) {
+      setTitle(data.data.title);
+      setDescription(data.data.description);
+      setThumbnailPreview(data.data.thumbnail);
+    }
+  }, [data]);
 
   const quillModules = {
     toolbar: [
@@ -34,7 +77,7 @@ export default function EditBlog() {
       ["bold", "italic", "underline"],
       [{ align: [] }],
       [{ list: "ordered" }, { list: "bullet" }],
-      ["code-block"],
+      ["image"],
     ],
   };
 
@@ -47,27 +90,26 @@ export default function EditBlog() {
     "align",
     "list",
     "bullet",
-    "code-block",
+    "image",
   ];
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      if (!file.type.startsWith("image/")) {
-        alert("Please select an image file");
-        return;
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        alert("File size should be less than 5MB");
-        return;
-      }
-      setThumbnail(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setThumbnailPreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
     }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size should be less than 5MB");
+      return;
+    }
+
+    setThumbnail(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => setThumbnailPreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
   };
 
   const handleUploadClick = () => {
@@ -77,15 +119,37 @@ export default function EditBlog() {
   const handleRemoveImage = () => {
     setThumbnail(null);
     setThumbnailPreview(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const handleSave = () => {
-    const blogData = { title, description, thumbnail };
-    console.log("Saving blog:", blogData);
-  };
+  // Update blog mutation
+  const updateBlogMutation = useMutation({
+    mutationFn: async () => {
+      if (!title || !description) throw new Error("Title and description are required");
+
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("description", description);
+      if (thumbnail) formData.append("thumbnail", thumbnail);
+
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/blog/${id}`, {
+        method: "PATCH",
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to update blog");
+      return data;
+    },
+    onSuccess: (data) => {
+      toast.success(data.message || "Blog updated successfully");
+      queryClient.invalidateQueries({ queryKey: ["blog"] });
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Failed to update blog");
+    },
+  });
 
   return (
     <div className="min-h-screen">
@@ -100,11 +164,11 @@ export default function EditBlog() {
             <ChevronRight size={16} />
             <span>Blog management</span>
             <ChevronRight size={16} />
-            <span className="text-gray-900">Add blog</span>
+            <span className="text-gray-900">Edit blog</span>
           </nav>
         </div>
         <Button
-          onClick={handleSave}
+          onClick={() => updateBlogMutation.mutate()}
           className="bg-gray-700 text-base h-[50px] hover:bg-gray-800 text-white px-6"
         >
           <Save size={20} className="" />
