@@ -47,6 +47,30 @@ const LoginForm = () => {
   });
 
   // 2. Define a submit handler.
+  // async function onSubmit(values: z.infer<typeof formSchema>) {
+  //   try {
+  //     setIsLoading(true);
+
+  //     const res = await signIn("credentials", {
+  //       email: values?.email,
+  //       password: values?.password,
+  //       redirect: false,
+  //     });
+
+  //     if (res?.error) {
+  //       throw new Error(res.error);
+  //     }
+
+  //     toast.success("Login successful!");
+  //     router.push("/");
+  //   } catch (error) {
+  //     console.error("Login failed:", error);
+  //     toast.error((error as Error).message);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true);
@@ -58,18 +82,21 @@ const LoginForm = () => {
       });
 
       if (res?.error) {
-        throw new Error(res.error);
+        toast.error(res.error);
+        return;
       }
 
       toast.success("Login successful!");
       router.push("/");
     } catch (error) {
       console.error("Login failed:", error);
-      toast.error((error as Error).message);
+      toast.error((error as Error).message || "Something went wrong");
     } finally {
       setIsLoading(false);
     }
   }
+
+
   return (
     <div>
       <div className="w-full md:w-[547px] p-3 md:p-7 lg:p-8 rounded-[16px] bg-white">
