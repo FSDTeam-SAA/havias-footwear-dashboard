@@ -27,82 +27,42 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { useQuery } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
+import { Order, OrderResponse } from "../../../../../../types/orderDataType";
 
-const dummyOrders = [
-  {
-    id: 1,
-    productName: "Wireless Headphones",
-    productImage: "https://i.pravatar.cc/150?img=12",
-    price: 120,
-    deliveryDate: "2025-08-01",
-  },
-  {
-    id: 2,
-    productName: "Smartphone Pro Max",
-    productImage: "https://i.pravatar.cc/150?img=20",
-    price: 999,
-    deliveryDate: "2025-08-12",
-  },
-  {
-    id: 3,
-    productName: "Gaming Laptop",
-    productImage: "https://i.pravatar.cc/150?img=19",
-    price: 1899,
-    deliveryDate: "2025-08-20",
-  },
-  {
-    id: 3,
-    productName: "Gaming Laptop",
-    productImage: "https://i.pravatar.cc/150?img=18",
-    price: 1899,
-    deliveryDate: "2025-08-20",
-  },
-  {
-    id: 3,
-    productName: "Gaming Laptop",
-    productImage: "https://i.pravatar.cc/150?img=17",
-    price: 1899,
-    deliveryDate: "2025-08-20",
-  },
-  {
-    id: 3,
-    productName: "Gaming Laptop",
-    productImage: "https://i.pravatar.cc/150?img=16",
-    price: 1899,
-    deliveryDate: "2025-08-20",
-  },
-  {
-    id: 3,
-    productName: "Gaming Laptop",
-    productImage: "https://i.pravatar.cc/150?img=15",
-    price: 1899,
-    deliveryDate: "2025-08-20",
-  },
-
-];
-
-type Order = {
-  id: number;
-  productName: string;
-  productImage: string;
-  price: number;
-  deliveryDate: string;
-};
+const itemsPerPage = 7;
 
 const OrderList = () => {
-  const itemsPerPage = 7;
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  const totalPages = Math.ceil(dummyOrders.length / itemsPerPage);
-  const paginatedOrders = dummyOrders.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const session = useSession();
+  const token = (session?.data?.user as { accessToken: string })?.accessToken;
+
+  const { data, isLoading } = useQuery<OrderResponse>({
+    queryKey: ["orders", currentPage],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/order?page=${currentPage}&limit=${itemsPerPage}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (!res.ok) throw new Error("Failed to fetch orders");
+      return res.json();
+    },
+    enabled: !!token,
+  });
+
+  const orders = data?.data || [];
+  const totalPages = data?.meta?.totalPages || 1;
 
   return (
     <div>
-
       {/* ✅ Table */}
       <div className="w-full mt-6">
         <div className="overflow-x-auto">
@@ -118,54 +78,53 @@ const OrderList = () => {
                 <TableHead className=" py-4 font-bold text-[20px] text-[#1C2228] text-sm uppercase tracking-wide w-40">
                   Delivery Date
                 </TableHead>
-                {/* <TableHead className="text-center py-4 font-semibold text-[#1C2228] text-sm uppercase tracking-wide w-32">
-                  Action
-                </TableHead> */}
               </TableRow>
             </TableHeader>
 
             <TableBody>
-              {paginatedOrders.map((order) => (
-                <TableRow key={order.id}>
+              {isLoading
+                ? Array.from({ length: itemsPerPage }).map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell className="py-4 flex items-center gap-3">
+                      <div className="h-12 w-12 rounded-full bg-gray-300 animate-pulse"></div>
+                      <div className="h-4 w-24 bg-gray-300 rounded animate-pulse"></div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="h-4 w-12 bg-gray-300 rounded animate-pulse"></div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="h-4 w-20 bg-gray-300 rounded animate-pulse"></div>
+                    </TableCell>
+                  </TableRow>
+                ))
+                : orders.map((order) =>
+                  order.items.map((item) => (
+                    <TableRow key={item._id}>
+                      <TableCell className="py-4  flex gap-3 items-center">
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage
+                            src={item.product?.images[0] || ""}
+                            alt={item.product?.title || "N/A"}
+                          />
+                          <AvatarFallback>
+                            {item.product?.title?.charAt(0).toUpperCase() || "N/A"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <p className="text-[#595959] text-[16px] font-medium">
+                          {item.product?.title?.slice(0, 10) || "N/A"}
+                        </p>
+                      </TableCell>
 
+                      <TableCell className=" text-sm font-medium text-[#1C2228]">
+                        ${item.unitPrice.toFixed(2)}
+                      </TableCell>
 
-                  <TableCell className="py-4  flex  ">
-                    <div className="flex  gap-3">
-                      <Avatar className="h-12 w-12">
-                        <AvatarImage src={order.productImage} alt={order.productName} />
-                        <AvatarFallback>
-                          {order.productName.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <p className="text-[#595959] text-[16px] font-medium">
-                        {order.productName.slice(0, 10)}
-                      </p>
-                    </div>
-                  </TableCell>
-
-                  <TableCell className=" text-sm font-medium text-[#1C2228]">
-                    ${order.price}
-                  </TableCell>
-
-                  {/* ✅ Delivery Date */}
-                  <TableCell className=" text-sm font-medium text-[#595959]">
-                    {order.deliveryDate}
-                  </TableCell>
-
-                  {/* ✅ Action */}
-                  {/* <TableCell className="text-center px-4 py-4">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 px-2 hover:bg-blue-100 hover:text-blue-600 transition-colors"
-                      onClick={() => setSelectedOrder(order)}
-                    >
-                      <Eye className="w-4 h-4 mr-1" />
-                      View
-                    </Button>
-                  </TableCell> */}
-                </TableRow>
-              ))}
+                      <TableCell className=" text-sm font-medium text-[#595959]">
+                        {new Date(order.createdAt).toLocaleDateString()}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
             </TableBody>
           </Table>
         </div>
@@ -179,9 +138,9 @@ const OrderList = () => {
             </span>{" "}
             to{" "}
             <span className="font-medium">
-              {Math.min(currentPage * itemsPerPage, dummyOrders.length)}
+              {Math.min(currentPage * itemsPerPage, data?.meta?.total || 0)}
             </span>{" "}
-            of <span className="font-medium">{dummyOrders.length}</span> results
+            of <span className="font-medium">{data?.meta?.total || 0}</span> results
           </p>
 
           <Pagination>
@@ -192,9 +151,7 @@ const OrderList = () => {
                   onClick={() =>
                     currentPage > 1 && setCurrentPage(currentPage - 1)
                   }
-                  className={
-                    currentPage === 1 ? "pointer-events-none opacity-50" : ""
-                  }
+                  className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
                 />
               </PaginationItem>
 
@@ -217,9 +174,7 @@ const OrderList = () => {
                     currentPage < totalPages && setCurrentPage(currentPage + 1)
                   }
                   className={
-                    currentPage === totalPages
-                      ? "pointer-events-none opacity-50"
-                      : ""
+                    currentPage === totalPages ? "pointer-events-none opacity-50" : ""
                   }
                 />
               </PaginationItem>
@@ -243,29 +198,45 @@ const OrderList = () => {
               <div className="flex items-center gap-4 py-4">
                 <Avatar className="h-16 w-16">
                   <AvatarImage
-                    src={selectedOrder.productImage}
-                    alt={selectedOrder.productName}
+                    src={selectedOrder.items[0]?.product?.images[0] || ""}
+                    alt={selectedOrder.items[0]?.product?.title || "Deleted Product"}
                   />
                   <AvatarFallback>
-                    {selectedOrder.productName.charAt(0).toUpperCase()}
+                    {selectedOrder.items[0]?.product?.title?.charAt(0).toUpperCase() || "X"}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="text-lg font-semibold">{selectedOrder.productName}</p>
+                  <p className="text-lg font-semibold">
+                    {selectedOrder.items[0]?.product?.title || "Deleted Product"}
+                  </p>
                   <p className="text-sm text-gray-500">
-                    Order ID: {selectedOrder.id}
+                    Order ID: {selectedOrder._id}
                   </p>
                 </div>
               </div>
 
               <div className="space-y-2 text-sm">
                 <p>
-                  <span className="font-medium">Price:</span> ${selectedOrder.price}
+                  <span className="font-medium">Total:</span> ${selectedOrder.total.toFixed(2)}
                 </p>
                 <p>
-                  <span className="font-medium">Delivery Date:</span>{" "}
-                  {selectedOrder.deliveryDate}
+                  <span className="font-medium">Buyer:</span> {selectedOrder.buyer.name} ({selectedOrder.buyer.email})
                 </p>
+                <p>
+                  <span className="font-medium">Shipping:</span> {selectedOrder.shippingAddress.address}, {selectedOrder.shippingAddress.city}
+                </p>
+                <p>
+                  <span className="font-medium">Payment:</span> {selectedOrder.paymentInfo.method} ({selectedOrder.paymentInfo.status})
+                </p>
+                <div className="mt-2">
+                  <span className="font-medium">Items:</span>
+                  {selectedOrder.items.map((item) => (
+                    <div key={item._id} className="flex justify-between py-1">
+                      <span>{item.product?.title || "Deleted Product"}</span>
+                      <span>{item.quantity} x ${item.unitPrice.toFixed(2)}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <DialogFooter>

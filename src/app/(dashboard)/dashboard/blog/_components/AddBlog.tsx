@@ -24,6 +24,7 @@ import "react-quill/dist/quill.snow.css";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function AddBlog() {
   const [title, setTitle] = useState<string>("");
@@ -32,6 +33,7 @@ export default function AddBlog() {
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const descriptionImageInputRef = useRef<HTMLInputElement | null>(null);
+  const router = useRouter()
   const session = useSession();
   const token = (session?.data?.user as { accessToken: string })?.accessToken;
   const queryClient = useQueryClient();
@@ -73,12 +75,12 @@ export default function AddBlog() {
     reader.readAsDataURL(file);
   };
 
-  const handleDescriptionImageUpload = () => {
-    const input = descriptionImageInputRef.current;
-    if (!input) return;
+  // const handleDescriptionImageUpload = () => {
+  //   const input = descriptionImageInputRef.current;
+  //   if (!input) return;
 
-    input.click();
-  };
+  //   input.click();
+  // };
 
   const handleDescriptionImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -159,6 +161,7 @@ export default function AddBlog() {
     onSuccess: (data) => {
       toast.success(data.message || "Blog added successfully");
       queryClient.invalidateQueries({ queryKey: ["blog"] });
+      router.push("/dashboard/blog");
       setTitle("");
       setDescription("");
 
@@ -242,12 +245,12 @@ export default function AddBlog() {
                   multiple
                   className="hidden"
                 />
-                <Button
+                {/* <Button
                   onClick={handleDescriptionImageUpload}
                   className="mt-2 bg-blue-500 text-white hover:bg-blue-600"
                 >
                   Add Image to Description
-                </Button>
+                </Button> */}
               </div>
             </CardContent>
           </Card>

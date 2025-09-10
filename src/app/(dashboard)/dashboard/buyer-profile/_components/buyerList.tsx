@@ -95,7 +95,7 @@ const BuyerList = () => {
                     <Table className="w-full">
                         <TableHeader>
                             <TableRow className=" border-[#B6B6B6] border-b border-t ">
-                                <TableHead className="text-center py-4 w-40">User Id</TableHead>
+                                {/* <TableHead className="text-center py-4 w-40">User Id</TableHead> */}
                                 <TableHead className="text-center py-4 w-40">User Name</TableHead>
                                 <TableHead className="text-center py-4 w-32">Total Order</TableHead>
                                 <TableHead className="text-center py-4 w-32">Delivered</TableHead>
@@ -108,9 +108,9 @@ const BuyerList = () => {
                         <TableBody>
                             {paginatedUsers.map((buyer) => (
                                 <TableRow key={buyer._id} className="border-[#B6B6B6] border-b">
-                                    <TableCell className="text-center text-sm font-medium text-[#595959]">
+                                    {/* <TableCell className="text-center text-sm font-medium text-[#595959]">
                                         {buyer._id}
-                                    </TableCell>
+                                    </TableCell> */}
                                     <TableCell className="text-center text-sm font-medium text-[#595959]">
                                         {buyer.userName}
                                     </TableCell>
