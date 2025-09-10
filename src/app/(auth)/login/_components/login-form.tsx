@@ -21,7 +21,6 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   email: z.string().email({
@@ -35,7 +34,6 @@ const formSchema = z.object({
 
 const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -87,7 +85,7 @@ const LoginForm = () => {
       }
 
       toast.success("Login successful!");
-      router.push("/");
+      document.location.href = "/";
     } catch (error) {
       console.error("Login failed:", error);
       toast.error((error as Error).message || "Something went wrong");

@@ -11,22 +11,37 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Link from "next/link";
-const dummyCategories = [
-  { id: 1, seller_id: "1140", product_id: "11110", revenue: "$1500" },
-  { id: 2, seller_id: "1140", product_id: "11110", revenue: "$1500" },
-  { id: 3, seller_id: "1140", product_id: "11110", revenue: "$1500" },
-  { id: 4, seller_id: "1140", product_id: "11110", revenue: "$1500" },
-  { id: 5, seller_id: "1140", product_id: "11110", revenue: "$1500" },
-  { id: 6, seller_id: "1140", product_id: "11110", revenue: "$1500" },
-  { id: 7, seller_id: "1140", product_id: "11110", revenue: "$1500" },
-];
+import { useQuery } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
+import { SellerRevenueResponse } from "../../../../../../types/sellerRevenueType";
 
 const RevenueList = () => {
   const itemsPerPage = 7;
   const [currentPage, setCurrentPage] = useState(1);
+  const session = useSession();
+  const token = (session?.data?.user as { accessToken: string })?.accessToken;
 
-  const totalPages = Math.ceil(dummyCategories.length / itemsPerPage);
-  const paginatedCategories = dummyCategories.slice(
+  const { data, isLoading } = useQuery<SellerRevenueResponse>({
+    queryKey: ["revenue"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/order/admin/sellers/revenue`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (!res.ok) throw new Error("Failed to fetch sellers revenue");
+      return res.json();
+    },
+    enabled: !!token,
+  });
+
+  const revenues = data?.data || [];
+  const totalPages = Math.ceil(revenues.length / itemsPerPage);
+  const paginatedRevenues = revenues.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -38,7 +53,7 @@ const RevenueList = () => {
       {/* Header Section */}
       <div className="border-b border-gray-200 pb-7 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold text-gray-900">Revenue from Seller </h1>
+          <h1 className="text-2xl font-bold text-gray-900">Revenue from Sellers</h1>
           <div className="flex items-center space-x-2 text-sm">
             <Link
               href="/dashboard"
@@ -47,11 +62,8 @@ const RevenueList = () => {
               Dashboard
             </Link>
             <span className="text-gray-400">›</span>
-            <span className="text-gray-500 text-base">Revenue from Seller </span>
+            <span className="text-gray-500 text-base">Revenue from Sellers</span>
           </div>
-        </div>
-
-        <div className="flex items-center space-x-3">
         </div>
       </div>
 
@@ -60,38 +72,41 @@ const RevenueList = () => {
         <Table className="w-full border-collapse">
           <TableHeader>
             <TableRow className="border-b border-gray-200">
-              <TableHead className="py-4 font-bold text-[#131313] text-base uppercase leading-[120%] w-10 text-center">
+              <TableHead className="py-4 font-bold text-[#131313] text-base uppercase leading-[120%] text-center">
                 Seller ID
               </TableHead>
-              <TableHead className="text-center font-bold text-[#131313] text-base uppercase leading-[120%] w-24">
-                Product ID
-              </TableHead>
-              <TableHead className="text-center font-bold text-[#131313] text-base uppercase leading-[120%] w-24">
-                Revenue from Seller
+              <TableHead className="text-center font-bold text-[#131313] text-base uppercase leading-[120%]">
+                Total Revenue
               </TableHead>
             </TableRow>
           </TableHeader>
 
           <TableBody>
-            {paginatedCategories.map((product) => (
-              <TableRow key={product.id}>
+            {paginatedRevenues.map((seller) => (
+              <TableRow key={seller._id}>
                 <TableCell className="text-center px-4 py-4">
-                  <span className="text-base font-medium text-[#424242] px-2 py-1">
-                    #{product.seller_id}
+                  <span className="text-base font-medium text-[#424242]">
+                    #{seller.sellerId}
                   </span>
                 </TableCell>
                 <TableCell className="text-center px-4 py-4">
-                  <span className="text-base font-medium text-[#424242]  ">
-                    {product.product_id}
-                  </span>
-                </TableCell>
-                <TableCell className="text-center px-4 py-4">
-                  <span className="text-base font-medium text-[#424242]  ">
-                    {product.revenue}
+                  <span className="text-base font-medium text-[#424242]">
+                    ${seller.totalRevenue.toFixed(2)}
                   </span>
                 </TableCell>
               </TableRow>
             ))}
+
+            {isLoading && (
+              <TableRow>
+                <TableCell
+                  colSpan={2}
+                  className="text-center py-6 text-gray-500"
+                >
+                  Loading...
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
 
@@ -104,9 +119,9 @@ const RevenueList = () => {
             </span>{" "}
             to{" "}
             <span className="font-medium">
-              {Math.min(currentPage * itemsPerPage, dummyCategories.length)}
+              {Math.min(currentPage * itemsPerPage, revenues.length)}
             </span>{" "}
-            of <span className="font-medium">{dummyCategories.length}</span> results
+            of <span className="font-medium">{revenues.length}</span> results
           </p>
 
           <div className="flex items-center space-x-2">
@@ -127,8 +142,8 @@ const RevenueList = () => {
                 onClick={() => handlePageChange(page)}
                 variant={currentPage === page ? "default" : "outline"}
                 className={`h-9 w-9 p-0 ${currentPage === page
-                  ? "bg-gray-800 text-white hover:bg-gray-900"
-                  : "border-gray-300 hover:bg-gray-50"
+                    ? "bg-gray-800 text-white hover:bg-gray-900"
+                    : "border-gray-300 hover:bg-gray-50"
                   }`}
               >
                 {page}

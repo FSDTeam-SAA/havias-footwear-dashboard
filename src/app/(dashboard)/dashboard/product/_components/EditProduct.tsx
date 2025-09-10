@@ -1,11 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
+import { z } from "zod";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+// import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -14,32 +26,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChevronRight, Upload, Plus, ImageIcon } from "lucide-react";
+import { ChevronRight, Upload, ImageIcon, Loader2 } from "lucide-react";
 import Image from "next/image";
 import "react-quill/dist/quill.snow.css";
-import Link from "next/link";
+import { TagsInput } from "@/components/ui/tagsInput";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 
-// --------------------
-// Types
-// --------------------
-type FormData = {
-  title: string;
-  vendorName: string;
-  msrp: string;
-  moq: string;
-  unitPrice: string;
-  packPrice: string;
-  quantity: string;
-  description: string;
-  status: "draft" | "active";
-  category: string;
-};
-
-// --------------------
 // React Quill Setup
-// --------------------
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
-
 const quillModules = {
   toolbar: [
     [{ header: [1, 2, false] }],
@@ -50,7 +46,6 @@ const quillModules = {
     ["code-block"],
   ],
 };
-
 const quillFormats = [
   "header",
   "font",
@@ -63,371 +58,663 @@ const quillFormats = [
   "code-block",
 ];
 
-// --------------------
-// AddProduct Component
-// --------------------
-export default function AddProduct() {
-  const [formData, setFormData] = useState<FormData>({
-    title: "",
-    vendorName: "",
-    msrp: "",
-    moq: "",
-    unitPrice: "",
-    packPrice: "",
-    quantity: "",
-    description: "",
-    status: "draft",
-    category: "",
+// Schema
+const formSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  msrp: z.string().optional(),
+  moq: z.string().optional(),
+  unitPrice: z.string().optional(),
+  packPrice: z.string().optional(),
+  quantity: z.string().optional(),
+  description: z.string().optional(),
+  // status: z.enum(["active", "deactive"]),
+  category: z.string().optional(),
+  productType: z.string().optional(),
+  subCategory: z.string().optional(),
+  brandName: z.string().optional(),
+  size: z.array(z.string()).optional(),
+  color: z.array(z.string()).optional(),
+});
+
+type FormData = z.infer<typeof formSchema>;
+
+export default function EditProduct({ id }: { id: string }) {
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<any>(null);
+  const [productTypes, setProductTypes] = useState<string[]>([]);
+  const [subCategories, setSubCategories] = useState<any[]>([]);
+  const [removedImages, setRemovedImages] = useState<string[]>([]);
+
+  const session = useSession();
+  const token = (session?.data?.user as { accessToken: string })?.accessToken;
+  const queryClient = useQueryClient();
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: "",
+      msrp: "",
+      moq: "",
+      unitPrice: "",
+      packPrice: "",
+      quantity: "",
+      description: "",
+      // status: "active",
+      category: "",
+      productType: "",
+      subCategory: "",
+      brandName: "",
+      size: [],
+      color: [],
+    },
   });
 
-  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  // Fetch categories
+  const { data: categoriesData } = useQuery<any>({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/category/all-categories?page=1&limit=50`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!res.ok) throw new Error("Failed to fetch categories");
+      return res.json();
+    },
+    enabled: !!token,
+  });
 
-  const handleInputChange = (field: keyof FormData, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
+  // Fetch single product
+  const { data: product, isLoading: isProductLoading } = useQuery<any>({
+    queryKey: ["singleProduct", id],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/product/${id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!res.ok) throw new Error("Failed to fetch product");
+      return res.json();
+    },
+    enabled: !!token && !!id,
+  });
 
+  // Set form values and images when product and categories data are available
+  useEffect(() => {
+    if (product && categoriesData) {
+      const productData = product.data;
+
+      // Find category
+      const initialCategory = categoriesData.data.find(
+        (c: any) => c._id === productData.category?._id
+      );
+
+      if (initialCategory) {
+        setSelectedCategory(initialCategory);
+        setProductTypes(initialCategory.productType || []);
+      }
+
+      // Reset form after productTypes are set
+      form.reset({
+        title: productData.title || "",
+        msrp: productData.msrp?.toString() || "",
+        moq: productData.moq?.toString() || "",
+        unitPrice: productData.unitPrice?.toString() || "",
+        packPrice: productData.discountPrice?.toString() || "",
+        quantity: productData.quantity?.toString() || "",
+        description: productData.description || "",
+        brandName: productData.brand || "",
+        size: productData.sizes || [],
+        color: productData.colors || [],
+        category: productData.category?._id || "",
+        productType: productData.productType || "",
+        subCategory: productData.subCategory?._id || "",
+      });
+
+      // Set uploaded images
+      if (productData.images?.length > 0) {
+        setUploadedImages(productData.images); // ✅ restore images
+      }
+    }
+  }, [product, categoriesData, form]);
+
+
+  // Fetch subcategories when selectedCategory changes
+  useEffect(() => {
+    if (!selectedCategory) return;
+
+    setProductTypes(selectedCategory.productType || []);
+    const fetchSubCategories = async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/sub-category/category/${selectedCategory._id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!res.ok) {
+        toast.error("Failed to fetch subcategories");
+        return;
+      }
+      const data = await res.json();
+      setSubCategories(data.data.subCategories || []);
+    };
+
+    fetchSubCategories();
+  }, [selectedCategory, token]);
+
+  // Image Upload Handler
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
-    files.forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          setUploadedImages((prev) => [
-            ...prev,
-            event.target?.result as string,
-          ]);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
+    setUploadedFiles((prev) => [...prev, ...files]);
+
+    const previewUrls = files.map((file) => URL.createObjectURL(file));
+    setUploadedImages((prev) => [...prev, ...previewUrls]);
   };
+
+  // Remove Image Handler
+  const handleRemoveImage = (image: string) => {
+    const isExistingImage = product.data.images.includes(image);
+
+    if (isExistingImage) {
+      setRemovedImages((prev) => [...prev, image]);
+    } else {
+      setUploadedFiles((prev) =>
+        prev.filter((file) => URL.createObjectURL(file) !== image)
+      );
+    }
+
+    // Remove the image from the preview list
+    setUploadedImages((prev) => prev.filter((img) => img !== image));
+  };
+
+
+  // Mutation
+  const updateProductMutation = useMutation({
+    mutationFn: async (body: any) => {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/product/${id}`, {
+        method: "PATCH", // Use PATCH for updates
+        headers: { Authorization: `Bearer ${token}` },
+        body,
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || "Failed to update product");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      toast.success("Product updated successfully");
+      queryClient.invalidateQueries({ queryKey: ["singleProduct", id] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      setUploadedFiles([]); // Clear new files after successful upload
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to update product");
+    },
+  });
+
+  // Submit
+  const onSubmit = (data: FormData) => {
+    const body = new FormData();
+
+    // Append newly uploaded files
+    uploadedFiles.forEach((file) => body.append("images", file));
+
+    // Append fields
+    body.append("title", data.title);
+    if (data.msrp) body.append("msrp", data.msrp);
+    if (data.moq) body.append("moq", data.moq);
+    if (data.unitPrice) body.append("unitPrice", data.unitPrice);
+    if (data.packPrice) body.append("discountPrice", data.packPrice);
+    if (data.quantity) body.append("quantity", data.quantity);
+    if (data.description) body.append("description", data.description ?? "");
+    // body.append("status", data.status);
+    if (data.category) body.append("category", data.category);
+    if (data.subCategory) body.append("subCategory", data.subCategory);
+    if (data.productType) body.append("productType", data.productType);
+    if (data.brandName) body.append("brand", data.brandName);
+
+    // Append arrays
+    data.size?.forEach((s) => body.append("sizes[]", s));
+    data.color?.forEach((c) => body.append("colors[]", c));
+
+    // Append the list of images to be removed.
+    removedImages.forEach((img) => body.append("removedImages[]", img));
+
+    updateProductMutation.mutate(body);
+  };
+
+  if (isProductLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[50vh]">
+        <Loader2 className="h-10 w-10 animate-spin text-[#797068]" />
+      </div>
+    );
+  }
+
 
   return (
     <div className="min-h-screen">
       <div className="">
-        <div>
-          {/* Header */}
-          <div className="flex justify-between items-center mb-3">
-            <h1 className="text-2xl font-semibold text-gray-900">
-              Add Products
-            </h1>
-            <Button
-              size="sm"
-              className="bg-[#797068] hover:bg-[#3a3129] text-white text-base h-[50px] px-6"
-            >
-              <Link href="/product/add" className="flex items-center">
-                {/* <Plus className="h-4 w-4 mr-2" /> */}
-                Update Product
-              </Link>
-            </Button>
-          </div>
-          {/* Breadcrumb */}
-          <div className="flex items-center text-sm text-gray-500 mb-6">
-            <span>Dashboard</span>
-            <ChevronRight className="w-4 h-4 mx-2" />
-            <span>Products List</span>
-            <ChevronRight className="w-4 h-4 mx-2" />
-            <span className="text-gray-900">Add Products</span>
-          </div>
+        {/* Header */}
+        <div className="pb-5 flex justify-between items-center">
+          <h1 className="text-2xl font-semibold text-gray-900">Edit Product</h1>
+          <Button
+            size="sm"
+            className="bg-[#797068] hover:bg-[#3a3129] text-white text-base h-[50px] px-6"
+            type="submit"
+            form="product-form"
+            disabled={updateProductMutation.isPending}
+          >
+            <div className="flex items-center">
+              Update Product {updateProductMutation.isPending && <Loader2 className="animate-spin ml-2" />}
+            </div>
+          </Button>
+        </div>
+        {/* Breadcrumb */}
+        <div className="flex items-center text-sm text-gray-500 mb-6">
+          <span>Dashboard</span>
+          <ChevronRight className="w-4 h-4 mx-2" />
+          <span>Products List</span>
+          <ChevronRight className="w-4 h-4 mx-2" />
+          <span className="text-gray-900">Edit Product</span>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Title */}
-            <Card>
-              <CardContent className="">
-                <Label
-                  htmlFor="title"
-                  className="text-base leading-[120%] font-semibold text-gray-900 mb-2 block"
-                >
-                  Add Title
-                </Label>
-                <Input
-                  id="title"
-                  placeholder="Add your title..."
-                  value={formData.title}
-                  onChange={(e) => handleInputChange("title", e.target.value)}
-                  className="w-full h-[50px] border border-[#B6B6B6]"
-                />
-              </CardContent>
-            </Card>
+        <Form {...form}>
+          <form
+            id="product-form"
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+          >
+            {/* Left Column */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Title */}
+              <Card>
+                <CardContent>
+                  <FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-base font-semibold text-gray-900">
+                          Add Title
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Add your title..."
+                            className="w-full h-[50px] border border-[#B6B6B6]"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
 
-            {/* Vendor Name */}
-            <Card>
-              <CardContent className="">
-                <Label
-                  htmlFor="vendor"
-                  className="text-base font-semibold text-gray-900 mb-2 block"
-                >
-                  Add Vendor Name
-                </Label>
-                <Input
-                  id="vendor"
-                  placeholder="Add vendor name..."
-                  value={formData.vendorName}
-                  onChange={(e) =>
-                    handleInputChange("vendorName", e.target.value)
-                  }
-                  className="w-full h-[50px] border border-[#B6B6B6]"
-                />
-              </CardContent>
-            </Card>
+              {/* MSRP & MOQ */}
+              <Card>
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="msrp"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>MSRP</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Manufacturer's Suggested Retail Price..."
+                            className="h-[50px] border border-[#B6B6B6]"
+                            {...field}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="moq"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>MOQ</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Minimum Order Quantity..."
+                            className="h-[50px] border border-[#B6B6B6]"
+                            {...field}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
 
-            {/* MSRP and MOQ */}
-            <Card>
-              <CardContent className="">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <Label
-                      htmlFor="msrp"
-                      className="text-base font-semibold text-gray-900 mb-2 block"
-                    >
-                      MSRP
-                    </Label>
-                    <Input
-                      id="msrp"
-                      placeholder="Manufacturer's Suggested Retail Price..."
-                      value={formData.msrp}
-                      className="w-full h-[50px] border border-[#B6B6B6]"
-                      onChange={(e) =>
-                        handleInputChange("msrp", e.target.value)
-                      }
-                    />
-                  </div>
-                  <div>
-                    <Label
-                      htmlFor="moq"
-                      className="text-base font-semibold text-gray-900 mb-2 block"
-                    >
-                      MOQ
-                    </Label>
-                    <Input
-                      id="moq"
-                      placeholder="Minimum Order Quantity..."
-                      className="w-full h-[50px] border border-[#B6B6B6]"
-                      value={formData.moq}
-                      onChange={(e) => handleInputChange("moq", e.target.value)}
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              {/* Price & Quantity */}
+              <Card>
+                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="unitPrice"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Unit Price</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Price per unit..."
+                            className="h-[50px] border border-[#B6B6B6]"
+                            {...field}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="packPrice"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Discount Price</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Only when product is sold in packs..."
+                            className="h-[50px] border border-[#B6B6B6]"
+                            {...field}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="quantity"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Quantity</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Add Quantity..."
+                            className="h-[50px] border border-[#B6B6B6]"
+                            {...field}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
 
-            {/* Price and Quantity */}
-            <Card>
-              <CardContent className="">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div>
-                    <Label
-                      htmlFor="unitPrice"
-                      className="text-base font-semibold text-gray-900 mb-2 block"
-                    >
-                      Unit Price
-                    </Label>
-                    <Input
-                      id="unitPrice"
-                      placeholder="Price per unit..."
-                      className="w-full h-[50px] border border-[#B6B6B6]"
-                      value={formData.unitPrice}
-                      onChange={(e) =>
-                        handleInputChange("unitPrice", e.target.value)
-                      }
-                    />
-                  </div>
-                  <div>
-                    <Label
-                      htmlFor="packPrice"
-                      className="text-base font-semibold text-gray-900 mb-2 block"
-                    >
-                      Pack Price
-                    </Label>
-                    <Input
-                      id="packPrice"
-                      placeholder="Only when product is sold in packs..."
-                      className="w-full h-[50px] border border-[#B6B6B6]"
-                      value={formData.packPrice}
-                      onChange={(e) =>
-                        handleInputChange("packPrice", e.target.value)
-                      }
-                    />
-                  </div>
-                  <div>
-                    <Label
-                      htmlFor="quantity"
-                      className="text-base font-semibold text-gray-900 mb-2 block"
-                    >
-                      Quantity
-                    </Label>
-                    <Input
-                      id="quantity"
-                      placeholder="Add Quantity..."
-                      className="w-full h-[50px] border border-[#B6B6B6]"
-                      value={formData.quantity}
-                      onChange={(e) =>
-                        handleInputChange("quantity", e.target.value)
-                      }
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              {/* Description */}
+              <Card>
+                <CardContent>
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                          <ReactQuill
+                            theme="snow"
+                            value={field.value}
+                            onChange={field.onChange}
+                            placeholder="Enter product description..."
+                            modules={quillModules}
+                            formats={quillFormats}
+                            className="h-[250px]"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
 
-            {/* Description */}
-            <Card>
-              <CardContent className="pb-10">
-                <Label className="text-base font-semibold text-gray-900 mb-2 block">
-                  Description
-                </Label>
-                <ReactQuill
-                  theme="snow"
-                  value={formData.description}
-                  onChange={(value) => handleInputChange("description", value)}
-                  placeholder="Enter product description..."
-                  modules={quillModules}
-                  formats={quillFormats}
-                  className="h-[250px]"
-                />
-              </CardContent>
-            </Card>
-
-            {/* Variants */}
-            <Card className="py-3">
-              <CardContent className="space-y-2">
-                <Label className="text-base font-semibold text-gray-900 block">
-                  Variants
-                </Label>
-                <Button
-                  variant="outline"
-                  className="w-full border-dashed flex items-center justify-center gap-2 px-3 py-2 text-sm"
-                >
-                  <Plus className="w-4 h-4" />
-                  Add options like size or color
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Right Column */}
-          <div className="space-y-2">
-            {/* Status */}
-            <Card>
-              <CardContent className="p-6">
-                <RadioGroup
-                  value={formData.status}
-                  onValueChange={(value) =>
-                    handleInputChange("status", value as FormData["status"])
-                  }
-                  className="flex gap-6"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="draft" id="draft" />
-                    <Label htmlFor="draft" className="text-sm">
-                      Draft
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="active" id="active" />
-                    <Label htmlFor="active" className="text-sm">
-                      Active
-                    </Label>
-                  </div>
-                </RadioGroup>
-              </CardContent>
-            </Card>
-
-            {/* Category */}
-            <Card>
-              <CardContent className="p-6">
-                <Label className="text-base font-semibold text-gray-900 mb-2 block">
-                  Category
-                </Label>
-                <Select
-                  value={formData.category}
-                  onValueChange={(value) =>
-                    handleInputChange("category", value)
-                  }
-                >
-                  <SelectTrigger className="w-full h-[50px] border border-[#B6B6B6]">
-                    <SelectValue placeholder="Select a Collection" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="electronics">Electronics</SelectItem>
-                    <SelectItem value="clothing">Clothing</SelectItem>
-                    <SelectItem value="books">Books</SelectItem>
-                    <SelectItem value="home">Home & Garden</SelectItem>
-                  </SelectContent>
-                </Select>
-              </CardContent>
-            </Card>
-
-            {/* Product Images */}
-            <Card>
-              <CardContent className="p-6">
-                <Label className="text-sm font-medium text-gray-900 mb-4 block">
-                  Add Product Image
-                </Label>
-
-                {/* Main upload area */}
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-4">
-                  <div className="flex flex-col items-center">
-                    <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                    <p className="text-sm text-gray-500 mb-1">
-                      Note: Upload Max200 *200 pixels and
+              {/* Size Tags Input */}
+              <Card>
+                <CardContent>
+                  <Label className="text-sm font-medium text-[#595959]">Size</Label>
+                  <Controller
+                    name="size"
+                    control={form.control}
+                    render={({ field }) => (
+                      <TagsInput
+                        value={field.value ?? []}
+                        onValueChange={field.onChange}
+                        placeholder="Enter sizes here..."
+                      />
+                    )}
+                  />
+                  {form.formState.errors.size && (
+                    <p className="text-red-500 text-sm">
+                      {form.formState.errors.size.message as string}
                     </p>
-                    <p className="text-sm text-gray-500">Formats PNG</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Color Tags Input */}
+              <Card>
+                <CardContent>
+                  <Label className="text-sm font-medium text-[#595959]">Color</Label>
+                  <Controller
+                    name="color"
+                    control={form.control}
+                    render={({ field }) => (
+                      <TagsInput
+                        value={field.value ?? []}
+                        onValueChange={field.onChange}
+                        placeholder="Enter colors here..."
+                      />
+                    )}
+                  />
+                  {form.formState.errors.color && (
+                    <p className="text-red-500 text-sm">
+                      {form.formState.errors.color.message as string}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Right Column */}
+            <div className="space-y-4">
+              {/* Status */}
+              {/* <Card>
+                <CardContent className="p-6">
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Status</FormLabel>
+                        <FormControl>
+                          <RadioGroup
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            className="flex gap-6"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="deactive" id="deactive" />
+                              <Label htmlFor="deactive">Deactive</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="active" id="active" />
+                              <Label htmlFor="active">Active</Label>
+                            </div>
+                          </RadioGroup>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card> */}
+
+              {/* Category */}
+              <Card>
+                <CardContent>
+                  <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Category</FormLabel>
+                        <Select
+                          onValueChange={(val) => {
+                            field.onChange(val);
+                            const selected = categoriesData?.data.find((c: any) => c._id === val);
+                            setSelectedCategory(selected);
+                          }}
+                          value={field.value}
+                        >
+                          <SelectTrigger className="h-[50px] border border-[#B6B6B6]">
+                            <SelectValue placeholder="Select a Category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {categoriesData?.data.map((cat: any) => (
+                              <SelectItem key={cat._id} value={cat._id}>
+                                {cat.name} {/* ✅ shows name instead of id */}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Product Type */}
+              <Card>
+                <CardContent>
+                  <FormField
+                    control={form.control}
+                    name="productType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Product Type</FormLabel>
+                        {productTypes.length > 0 && (
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <SelectTrigger className="h-[50px] border border-[#B6B6B6]">
+                              <SelectValue placeholder="Select Product Type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {productTypes.map((pt) => (
+                                <SelectItem key={pt} value={pt}>
+                                  {pt}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+
+
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+
+              {/* SubCategory */}
+              <Card>
+                <CardContent>
+                  <FormField
+                    control={form.control}
+                    name="subCategory"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Sub-Category</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <SelectTrigger className="h-[50px] border border-[#B6B6B6]">
+                            <SelectValue placeholder="Select Sub-Category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {subCategories?.map((sc) => (
+                              <SelectItem key={sc._id} value={sc._id}>
+                                {sc.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Brand Name */}
+              <Card>
+                <CardContent>
+                  <FormField
+                    control={form.control}
+                    name="brandName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Brand Name</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Write your Brand Name..."
+                            className="h-[50px] border border-[#B6B6B6]"
+                            {...field}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Product Images */}
+              <Card>
+                <CardContent>
+                  <FormLabel>Upload Images</FormLabel>
+                  <div className="grid grid-cols-4 gap-2">
+                    {uploadedImages.map((image, index) => (
+                      <div
+                        key={index}
+                        className="relative aspect-square border border-gray-300 rounded-lg overflow-hidden"
+                      >
+                        <Image
+                          width={300}
+                          height={300}
+                          src={image}
+                          alt={`Upload ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImage(image)}
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                    {Array.from({ length: Math.max(0, 4 - uploadedImages.length) }).map(
+                      (_, index) => (
+                        <div
+                          key={`empty-${index}`}
+                          className="aspect-square border border-gray-300 rounded-lg flex items-center justify-center bg-gray-50"
+                        >
+                          <ImageIcon className="w-6 h-6 text-gray-300" />
+                        </div>
+                      )
+                    )}
+                  </div>
+                  <label className="mt-2 flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                    <Upload className="w-5 h-5 mr-2" />
+                    <span className="text-sm">Upload Images</span>
                     <input
                       type="file"
                       multiple
                       accept="image/*"
-                      onChange={handleImageUpload}
                       className="hidden"
-                      id="image-upload"
+                      onChange={handleImageUpload}
                     />
-                    <Button
-                      variant="outline"
-                      className="mt-4"
-                      onClick={() =>
-                        document.getElementById("image-upload")?.click()
-                      }
-                    >
-                      Upload Image
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Image preview grid */}
-                <div className="grid grid-cols-4 gap-2">
-                  {uploadedImages.map((image, index) => (
-                    <div
-                      key={index}
-                      className="aspect-square border border-gray-300 rounded-lg overflow-hidden"
-                    >
-                      <Image
-                        width={300}
-                        height={300}
-                        src={image}
-                        alt={`Upload ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ))}
-                  {/* Empty slots */}
-                  {Array.from({
-                    length: Math.max(0, 4 - uploadedImages.length),
-                  }).map((_, index) => (
-                    <div
-                      key={`empty-${index}`}
-                      className="aspect-square border border-gray-300 rounded-lg flex items-center justify-center bg-gray-50"
-                    >
-                      <ImageIcon className="w-6 h-6 text-gray-300" />
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+                  </label>
+                </CardContent>
+              </Card>
+            </div>
+          </form>
+        </Form>
       </div>
     </div>
   );

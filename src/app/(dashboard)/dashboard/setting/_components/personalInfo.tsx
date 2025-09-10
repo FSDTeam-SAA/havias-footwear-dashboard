@@ -277,7 +277,7 @@ import React, { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PencilIcon, Save } from "lucide-react";
+import { Loader2, PencilIcon, Save } from "lucide-react";
 import Link from "next/link";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -297,11 +297,9 @@ export default function ProfilePage() {
 
     const [formData, setFormData] = useState({
         fullName: "",
-
         email: "",
         phone: "",
         dob: null as Date | null,
-
         address: "",
     });
 
@@ -323,7 +321,7 @@ export default function ProfilePage() {
         },
         enabled: !!token,
     });
-    
+
     console.log(isLoading)
     // Populate form with API data
     useEffect(() => {
@@ -490,7 +488,7 @@ export default function ProfilePage() {
                             onClick={handleUploadAvatar}
                             className="ml-0 text-sm bg-btnPrimary hover:bg-btnPrimary/80 text-white"
                         >
-                            Upload Avatar
+                            Upload Avatar {avatarMutation.isPending && <Loader2 className="animate-spin mr-2" />}
                         </Button>
                     )}
                 </div>

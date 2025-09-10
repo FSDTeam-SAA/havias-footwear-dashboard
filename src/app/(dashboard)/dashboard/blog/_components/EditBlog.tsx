@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChevronRight, X, ImageDown, Save } from "lucide-react";
+import { ChevronRight, X, ImageDown, Save, Loader2 } from "lucide-react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { Label } from "@/components/ui/label";
@@ -20,6 +20,7 @@ const ReactQuill = dynamic(() => import("react-quill"), {
   ),
 });
 import "react-quill/dist/quill.snow.css";
+import { useRouter } from "next/navigation";
 
 interface BlogData {
   _id: string;
@@ -38,7 +39,7 @@ export default function EditBlog({ id }: { id: string }) {
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-
+  const router = useRouter();
   const session = useSession();
   const token = (session?.data?.user as { accessToken?: string })?.accessToken;
   const queryClient = useQueryClient();
@@ -145,6 +146,7 @@ export default function EditBlog({ id }: { id: string }) {
     onSuccess: (data) => {
       toast.success(data.message || "Blog updated successfully");
       queryClient.invalidateQueries({ queryKey: ["blog"] });
+      router.push("/dashboard/blog");
     },
     onError: (error) => {
       toast.error(error instanceof Error ? error.message : "Failed to update blog");
@@ -172,7 +174,7 @@ export default function EditBlog({ id }: { id: string }) {
           className="bg-gray-700 text-base h-[50px] hover:bg-gray-800 text-white px-6"
         >
           <Save size={20} className="" />
-          Save Blog
+          Save Blog {updateBlogMutation.isPending && <Loader2 className="animate-spin mr-2" />}
         </Button>
       </div>
 
