@@ -18,7 +18,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import Link from "next/link";
+// import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { toast } from "sonner";
 
@@ -208,12 +208,12 @@ const LoginForm = () => {
                     </Label>
                     <FormMessage className="text-red-500" />
                   </FormItem>
-                  <Link
+                  {/* <Link
                     className="text-sm font-medium text-[#293440] leading-[120%] hover:underline"
                     href="/forgot-password"
                   >
                     Forgot Password?
-                  </Link>
+                  </Link> */}
                 </div>
               )}
             />
