@@ -157,9 +157,9 @@ const ListOfProfile = () => {
                     <Table className="w-full">
                         <TableHeader>
                             <TableRow className="border-b border-t border-[#B6B6B6]">
-                                <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-40">
+                                {/* <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-40">
                                     Seller Id
-                                </TableHead>
+                                </TableHead> */}
                                 <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-40">
                                     Seller Name
                                 </TableHead>
@@ -175,9 +175,9 @@ const ListOfProfile = () => {
                         <TableBody>
                             {paginatedSellers.map((seller) => (
                                 <TableRow key={seller._id} className="border-[#B6B6B6]">
-                                    <TableCell className="text-center text-sm font-medium text-[#595959]">
+                                    {/* <TableCell className="text-center text-sm font-medium text-[#595959]">
                                         {seller._id}
-                                    </TableCell>
+                                    </TableCell> */}
                                     <TableCell className="py-4 flex justify-center">
                                         <p className="text-[#595959] text-[16px] font-medium">{seller.userId.name}</p>
                                     </TableCell>

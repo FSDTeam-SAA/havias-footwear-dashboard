@@ -1,10 +1,10 @@
 import React from 'react'
 import EditProduct from '../../_components/EditProduct'
 
-function page() {
+function page({params}:{params:{id:string}}) {
   return (
     <div>
-        <EditProduct />
+        <EditProduct id={params.id} />
     </div>
   )
 }
