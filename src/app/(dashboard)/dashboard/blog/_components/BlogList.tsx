@@ -17,12 +17,15 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { BlogsResponse } from "../../../../../../types/blogDataType";
 import { toast } from "sonner";
+import ConfirmationModal from "@/components/confirmationModal";
 
 const BlogList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const session = useSession();
   const queryClient = useQueryClient();
   const token = (session?.data?.user as { accessToken: string })?.accessToken;
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [blogToDelete, setBlogToDelete] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery<BlogsResponse>({
     queryKey: ["blog", currentPage],
@@ -42,15 +45,15 @@ const BlogList = () => {
     enabled: !!token,
   });
 
-  console.log(isLoading)
+
   const blogs = data?.data || [];
   const meta = data?.meta;
   const totalPages = meta ? Math.ceil(meta.total / meta.limit) : 1;
 
   const blogDeleteMutation = useMutation({
-    mutationFn: async (data: { id: string }) => {
+    mutationFn: async (id: string) => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/blog/${data.id}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/blog/${id}`,
         {
           method: "DELETE",
           headers: {
@@ -68,6 +71,7 @@ const BlogList = () => {
       return res.json();
     },
     onSuccess: (data) => {
+      setDeleteModalOpen(false);
       queryClient.invalidateQueries({ queryKey: ["blog"] });
       toast.success(data.message || "Blog deleted successfully");
     },
@@ -76,9 +80,19 @@ const BlogList = () => {
     },
   });
 
-  const handleDelete = ({ id }: { id: string }) => {
-    blogDeleteMutation.mutate({ id });
+
+  // Open delete confirmation modal
+  const confirmDelete = (sellerId: string) => {
+    setBlogToDelete(sellerId);
+    setDeleteModalOpen(true);
   };
+
+
+  const handleDelete = () => {
+    if (blogToDelete) blogDeleteMutation.mutate(blogToDelete);
+    setBlogToDelete(null);
+  };
+
 
   return (
     <div>
@@ -134,62 +148,103 @@ const BlogList = () => {
             </TableHeader>
 
             <TableBody>
-              {blogs.map((blog) => (
-                <TableRow key={blog._id}>
-                  {/* Blog Title + Thumbnail */}
-                  <TableCell className="py-4">
-                    <div className="flex items-center space-x-4">
-                      <div className="flex-shrink-0 ">
-                        <Image
-                          src={blog.thumbnail}
-                          alt={blog.title.slice(0, 10)}
-                          width={100}
-                          height={100}
-                          className="rounded-lg w-16 h-16 object-cover border border-gray-200"
-                        />
+              {isLoading
+                ? // Skeleton Loader
+                Array.from({ length: 5 }).map((_, idx) => (
+                  <TableRow
+                    key={idx}
+                    className="animate-pulse border-b border-gray-200"
+                  >
+                    {/* Blog Thumbnail + Title */}
+                    <TableCell className="py-4">
+                      <div className="flex items-center space-x-4">
+                        <div className="h-16 w-16 bg-gray-300 rounded-lg"></div>
+                        <div className="flex-1 space-y-2 py-1">
+                          <div className="h-4 w-32 bg-gray-300 rounded"></div>
+                          <div className="h-3 w-24 bg-gray-300 rounded"></div>
+                        </div>
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="font-semibold text-[#272727] text-sm mb-1 truncate">
-                          {blog.title}
-                        </p>
+                    </TableCell>
+
+                    {/* Created At */}
+                    <TableCell className="text-center px-4 py-4">
+                      <div className="h-4 w-20 bg-gray-300 rounded mx-auto"></div>
+                    </TableCell>
+
+                    {/* Actions */}
+                    <TableCell className="text-center px-4 py-4">
+                      <div className="flex justify-center items-center gap-2">
+                        <div className="h-8 w-8 bg-gray-300 rounded"></div>
+                        <div className="h-8 w-8 bg-gray-300 rounded"></div>
                       </div>
-                    </div>
-                  </TableCell>
+                    </TableCell>
+                  </TableRow>
+                ))
+                : blogs.length > 0
+                  ? blogs.map((blog) => (
+                    <TableRow key={blog._id}>
+                      {/* Blog Title + Thumbnail */}
+                      <TableCell className="py-4">
+                        <div className="flex items-center space-x-4">
+                          <div className="flex-shrink-0 ">
+                            <Image
+                              src={blog.thumbnail}
+                              alt={blog.title.slice(0, 10)}
+                              width={100}
+                              height={100}
+                              className="rounded-lg w-16 h-16 object-cover border border-gray-200"
+                            />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-semibold text-[#272727] text-sm mb-1 truncate">
+                              {blog.title}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
 
-                  {/* Created At */}
-                  <TableCell className="text-center px-4 py-4">
-                    <span className="text-base font-medium">
-                      {new Date(blog.createdAt).toLocaleString()}
-                    </span>
-                  </TableCell>
+                      {/* Created At */}
+                      <TableCell className="text-center px-4 py-4">
+                        <span className="text-base font-medium">
+                          {new Date(blog.createdAt).toLocaleString()}
+                        </span>
+                      </TableCell>
 
-                  {/* Actions */}
-                  <TableCell className="text-center px-4 py-4">
-                    <div className="flex justify-center items-center gap-2">
-                      <Link href={`/dashboard/blog/edit/${blog._id}`}>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0 hover:bg-green-100 hover:text-green-600"
-                          title="Edit Blog"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                      </Link>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0 hover:bg-red-100 hover:text-red-600"
-                        title="Delete Blog"
-                        onClick={() => handleDelete({ id: blog._id })}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+                      {/* Actions */}
+                      <TableCell className="text-center px-4 py-4">
+                        <div className="flex justify-center items-center gap-2">
+                          <Link href={`/dashboard/blog/edit/${blog._id}`}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 hover:bg-green-100 hover:text-green-600"
+                              title="Edit Blog"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                          </Link>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 hover:bg-red-100 hover:text-red-600"
+                            title="Delete Blog"
+                            onClick={() => confirmDelete(blog._id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                  : (
+                    <TableRow>
+                      <TableCell colSpan={3} className="text-center py-6">
+                        No blogs found
+                      </TableCell>
+                    </TableRow>
+                  )}
             </TableBody>
+
           </Table>
         </div>
 
@@ -251,6 +306,16 @@ const BlogList = () => {
           </div>
         )}
       </div>
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={deleteModalOpen}
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteModalOpen(false)}
+        title={`Delete Blog ${blogDeleteMutation.isPending ? "..." : ""}`}
+        description="Are you sure you want to delete this blog? This action cannot be undone."
+        confirmText={blogDeleteMutation.isPending ? "Deleting..." : "Delete"}
+        cancelText="Cancel"
+      />
     </div>
   );
 };

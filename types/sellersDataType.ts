@@ -2,6 +2,7 @@ export interface SellerUser {
   _id: string;
   name: string;
   email: string;
+  profileImage?: string;
   role: "seller" | "admin" | "user" | string;
 }
 
@@ -11,7 +12,7 @@ export interface Seller {
   businessEmail: string;
   companyName: string;
   taxId: string;
-  isApproved: boolean;
+  isApproved: boolean | string;
   comments?: string;
   createdAt: string; // ISO date string
   updatedAt: string; // ISO date string
