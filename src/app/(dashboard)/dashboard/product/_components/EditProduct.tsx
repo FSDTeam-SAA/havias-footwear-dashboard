@@ -85,6 +85,8 @@ export default function EditProduct({ id }: { id: string }) {
   const [productTypes, setProductTypes] = useState<string[]>([]);
   const [subCategories, setSubCategories] = useState<any[]>([]);
   const [removedImages, setRemovedImages] = useState<string[]>([]);
+  const [deactiveProductType, setDeactiveProductType] = useState(false);
+  const [deactiveSubCategory, setDeactiveSubCategory] = useState(false);
 
   const session = useSession();
   const token = (session?.data?.user as { accessToken: string })?.accessToken;
@@ -172,7 +174,7 @@ export default function EditProduct({ id }: { id: string }) {
 
       // Set uploaded images
       if (productData.images?.length > 0) {
-        setUploadedImages(productData.images); // ✅ restore images
+        setUploadedImages(productData.images);
       }
     }
   }, [product, categoriesData, form]);
@@ -182,18 +184,26 @@ export default function EditProduct({ id }: { id: string }) {
   useEffect(() => {
     if (!selectedCategory) return;
 
-    setProductTypes(selectedCategory.productType || []);
+    const types = selectedCategory.productType || [];
+    setProductTypes(types);
+    // setProductTypes(selectedCategory.productType || []);
+
     const fetchSubCategories = async () => {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/sub-category/category/${selectedCategory._id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (!res.ok) {
-        toast.error("Failed to fetch subcategories");
+        // toast.error("Failed to fetch subcategories");
         return;
       }
       const data = await res.json();
-      setSubCategories(data.data.subCategories || []);
+      const subCats = data.data.subCategories || [];
+      setSubCategories(subCats);
+      // setSubCategories(data.data.subCategories || []);1
+
+      setDeactiveProductType(types.length === 0);
+      setDeactiveSubCategory(subCats.length === 0);
     };
 
     fetchSubCategories();
@@ -592,7 +602,7 @@ export default function EditProduct({ id }: { id: string }) {
                       <FormItem>
                         <FormLabel>Product Type</FormLabel>
                         {productTypes.length > 0 && (
-                          <Select onValueChange={field.onChange} value={field.value}>
+                          <Select disabled={deactiveProductType || productTypes.length === 0} onValueChange={field.onChange} value={field.value}>
                             <SelectTrigger className="h-[50px] border border-[#B6B6B6]">
                               <SelectValue placeholder="Select Product Type" />
                             </SelectTrigger>
@@ -622,7 +632,7 @@ export default function EditProduct({ id }: { id: string }) {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Sub-Category</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select disabled={deactiveSubCategory || subCategories.length === 0} onValueChange={field.onChange} value={field.value}>
                           <SelectTrigger className="h-[50px] border border-[#B6B6B6]">
                             <SelectValue placeholder="Select Sub-Category" />
                           </SelectTrigger>

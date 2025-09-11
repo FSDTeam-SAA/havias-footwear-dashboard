@@ -21,10 +21,9 @@ import {
   CheckCheck,
 } from "lucide-react";
 import Image from "next/image";
-import { signOut } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { LogoutModal } from "../logoutModal";
 
-// Define TypeScript types
 type NavItem = {
   name: string;
   href?: string;
@@ -43,21 +42,29 @@ const navigation: NavItem[] = [
     ],
   },
   { name: "Product", href: "/dashboard/product", icon: Grip },
-  { name: "Product Request", href: "/dashboard/request-product", icon: CheckCheck  },
+  { name: "Product Request", href: "/dashboard/request-product", icon: CheckCheck },
   { name: "Order", href: "/dashboard/orders", icon: Handbag },
-  { name: "Revenue from Seller ", href: "/dashboard/revenue", icon: DollarSign },
+  { name: "Revenue from Seller", href: "/dashboard/revenue", icon: DollarSign },
   { name: "Blog management", href: "/dashboard/blog", icon: AppWindow },
   { name: "Seller Management", href: "/dashboard/seller-management", icon: User2 },
-  { name: "Seller Profile Request ", href: "/dashboard/seller-profile-request", icon: UserCheck },
-  { name: "Buyer Profile ", href: "/dashboard/buyer-profile", icon: Users },
-  { name: "Setting ", href: "/dashboard/setting", icon: Settings },
+  { name: "Seller Profile Request", href: "/dashboard/seller-profile-request", icon: UserCheck },
+  { name: "Buyer Profile", href: "/dashboard/buyer-profile", icon: Users },
+  { name: "Setting", href: "/dashboard/setting", icon: Settings },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
-  const [openDropdown, setOpenDropdown] = useState<string | null>(
-    pathname.startsWith("/dashboard/categories") ? "Categories" : null
-  );
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  // Auto-open dropdown if current path is inside children
+  useEffect(() => {
+    const activeDropdown = navigation.find(
+      (item) =>
+        item.children &&
+        item.children.some((child) => pathname.startsWith(child.href))
+    );
+    setOpenDropdown(activeDropdown ? activeDropdown.name : null);
+  }, [pathname]);
 
   return (
     <div className="flex h-screen sticky bottom-0 top-0 w-[350px] flex-col bg-[#1C2228] z-50">
@@ -78,34 +85,47 @@ export function Sidebar() {
         {navigation.map((item) => {
           let isActive = false;
 
-          // If item has children, check if any child matches the current pathname
           if (item.children) {
             isActive = item.children.some((child) => pathname === child.href);
           } else if (item.href) {
-            // Regular nav item
             isActive = pathname === item.href;
           }
 
-          // Dropdown items
+          // Dropdown
           if (item.children && item.icon) {
-            const isOpen = openDropdown === item.name || item.children.some((child) => pathname === child.href);
+            const isOpen = openDropdown === item.name;
             return (
               <div key={item.name} className="w-[90%] mx-auto">
-                <button
-                  onClick={() => setOpenDropdown(isOpen ? null : item.name)}
+                <Link
+                  href="/dashboard/categories" // parent route
+                  onClick={(e) => {
+                    // If already open, just toggle
+                    if (isOpen) {
+                      e.preventDefault();
+                      setOpenDropdown(null);
+                    } else {
+                      setOpenDropdown(item.name);
+                    }
+                  }}
                   className={cn(
                     "flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
-                    isOpen ? "bg-btnPrimary text-white" : "text-white hover:bg-btnPrimary/70 hover:text-white"
+                    pathname.startsWith("/dashboard/categories")
+                      ? "bg-btnPrimary text-white"
+                      : "text-white hover:bg-btnPrimary/70 hover:text-white"
                   )}
                 >
                   <div className="flex items-center gap-2">
                     <item.icon className="h-6 w-6" />
                     <span className="text-base">{item.name}</span>
                   </div>
-                  {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                </button>
+                  {isOpen ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
+                </Link>
 
-                {/* Dropdown Items */}
+                {/* Dropdown children */}
                 {isOpen && (
                   <div className="ml-8 mt-2 space-y-1">
                     {item.children.map((child) => {
@@ -116,7 +136,9 @@ export function Sidebar() {
                           href={child.href}
                           className={cn(
                             "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
-                            childActive ? "bg-btnPrimary text-white" : "text-white hover:bg-btnPrimary/70 hover:text-white"
+                            childActive
+                              ? "bg-btnPrimary text-white"
+                              : "text-white hover:bg-btnPrimary/70 hover:text-white"
                           )}
                         >
                           <span className="text-base">{child.name}</span>
@@ -129,7 +151,7 @@ export function Sidebar() {
             );
           }
 
-          // Regular nav items
+          // Regular items
           if (item.href && item.icon) {
             return (
               <Link
@@ -137,7 +159,9 @@ export function Sidebar() {
                 href={item.href}
                 className={cn(
                   "flex w-[90%] mx-auto items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
-                  isActive ? "bg-btnPrimary text-white" : "text-white hover:bg-btnPrimary/70 hover:text-white"
+                  isActive
+                    ? "bg-btnPrimary text-white"
+                    : "text-white hover:bg-btnPrimary/70 hover:text-white"
                 )}
               >
                 <item.icon className="h-6 w-6" />
@@ -150,13 +174,22 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Logout fixed at bottom */}
-      <div onClick={() => signOut({ callbackUrl: "/" })} className="p-3">
-        <div className="flex items-center justify-start space-y-1 rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition-all duration-200 hover:bg-slate-600/50 hover:text-white cursor-pointer">
+      {/* Logout */}
+      <div
+        onClick={() => setIsLogoutModalOpen(true)}
+        className="p-3 cursor-pointer"
+      >
+        <div className="flex items-center justify-start space-y-1 rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition-all duration-200 hover:bg-slate-600/50 hover:text-white">
           <LogOut className="h-5 w-5" />
-          <span className="font-normal text-base leading-[120%]">Log Out</span>
+          <span className="font-normal text-base leading-[120%]">
+            Log Out
+          </span>
         </div>
       </div>
+      <LogoutModal
+        open={isLogoutModalOpen}
+        onOpenChange={setIsLogoutModalOpen}
+      />
     </div>
   );
 }

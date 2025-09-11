@@ -25,19 +25,21 @@ import SingelSellersProfile from "./singelSellersProfile";
 import { Eye, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
+import ConfirmationModal from "@/components/confirmationModal";
 
 const ListOfProfile = () => {
     const itemsPerPage = 7;
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedSellerId, setSelectedSellerId] = useState<string | null>(null);
     const [open, setOpen] = useState(false);
-
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [sellerToDelete, setSellerToDelete] = useState<string | null>(null);
     const session = useSession();
     const token = (session?.data?.user as { accessToken: string })?.accessToken;
     const queryClient = useQueryClient();
 
     // Fetch all sellers
-    const { data } = useQuery<SellersResponse>({
+    const { data, isLoading } = useQuery<SellersResponse>({
         queryKey: ["sellers"],
         queryFn: async () => {
             const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/seller`, {
@@ -61,7 +63,7 @@ const ListOfProfile = () => {
 
     // Mutation to update status
     const statusMutation = useMutation({
-        mutationFn: async ({ sellerId, approve }: { sellerId: string; approve: boolean }) => {
+        mutationFn: async ({ sellerId, isApproved }: { sellerId: string; isApproved: string }) => {
             const res = await fetch(
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/seller/${sellerId}/approve`,
                 {
@@ -70,28 +72,23 @@ const ListOfProfile = () => {
                         "Content-Type": "application/json",
                         Authorization: `Bearer ${token}`,
                     },
-                    body: JSON.stringify({ approve: approve }),
+                    body: JSON.stringify({ isApproved }),
                 }
             );
+
             const resData = await res.json();
             if (!res.ok) throw new Error(resData.message || "Failed to update status");
             return resData;
         },
-        onSuccess: (_, { sellerId, approve }) => {
-            toast.success(`Seller ${approve ? "Approved" : "Rejected"} successfully`);
-            // Update UI instantly
-            queryClient.setQueryData<SellersResponse>(["sellers"], (oldData) => {
-                if (!oldData) return oldData;
-                const updatedData = oldData.data.data.map((s) =>
-                    s._id === sellerId ? { ...s, isApproved: approve } : s
-                );
-                return { ...oldData, data: { ...oldData.data, data: updatedData } };
-            });
+        onSuccess: () => {
+            toast.success("Status updated successfully");
+
         },
         onError: (error) => {
             toast.error(error.message || "Failed to update status");
         },
     });
+
 
     // Mutation to delete seller
     const deleteSellerMutation = useMutation({
@@ -120,6 +117,20 @@ const ListOfProfile = () => {
             toast.error(error.message || "Failed to delete seller");
         },
     });
+
+
+    // Open delete confirmation modal
+    const confirmDelete = (sellerId: string) => {
+        setSellerToDelete(sellerId);
+        setDeleteModalOpen(true);
+    };
+
+
+    const handleDelete = () => {
+        if (sellerToDelete) deleteSellerMutation.mutate(sellerToDelete);
+        setDeleteModalOpen(false);
+        setSellerToDelete(null);
+    };
 
     const handlePageChange = (page: number) => {
         if (page >= 1 && page <= totalPages) setCurrentPage(page);
@@ -154,81 +165,110 @@ const ListOfProfile = () => {
             {/* Table Section */}
             <div className="w-full mt-6">
                 <div className="overflow-x-auto">
-                    <Table className="w-full">
-                        <TableHeader>
-                            <TableRow className="border-b border-t border-[#B6B6B6]">
-                                {/* <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-40">
-                                    Seller Id
-                                </TableHead> */}
-                                <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-40">
-                                    Seller Name
-                                </TableHead>
-                                <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-40">
-                                    Status
-                                </TableHead>
-                                <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-40">
-                                    Action
-                                </TableHead>
-                            </TableRow>
-                        </TableHeader>
-
-                        <TableBody>
-                            {paginatedSellers.map((seller) => (
-                                <TableRow key={seller._id} className="border-[#B6B6B6]">
-                                    {/* <TableCell className="text-center text-sm font-medium text-[#595959]">
-                                        {seller._id}
-                                    </TableCell> */}
-                                    <TableCell className="py-4 flex justify-center">
-                                        <p className="text-[#595959] text-[16px] font-medium">{seller.userId.name}</p>
-                                    </TableCell>
-                                    <TableCell className="text-center py-4 text-sm font-medium">
-                                        {seller.isApproved ? "Approved" : "Rejected"}
-                                    </TableCell>
-                                    <TableCell className="text-center px-4 py-4">
-                                        <div className="flex justify-center items-center gap-2">
-                                            <Select
-                                                onValueChange={(value) =>
-                                                    statusMutation.mutate({ sellerId: seller._id, approve: value === "true" })
-                                                }
-                                            >
-                                                <SelectTrigger className="w-[120px] border-none shadow-none rounded-full h-8">
-                                                    <SelectValue placeholder="Action" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="true">Approve</SelectItem>
-                                                    <SelectItem value="false">Reject</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="h-8 px-2 hover:bg-blue-100 hover:text-blue-600 transition-colors"
-                                                title="View Details"
-                                                onClick={() => {
-                                                    setSelectedSellerId(seller._id);
-                                                    setOpen(true);
-                                                }}
-                                            >
-                                                <Eye className="w-4 h-4 mr-1" />
-                                                View
-                                            </Button>
-
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="h-8 px-2 hover:bg-red-50 hover:text-red-600 transition-colors"
-                                                title="Delete User"
-                                                onClick={() => deleteSellerMutation.mutate(seller._id)}
-                                            >
-                                                <Trash2 className="w-4 h-4 mr-1" />
-                                            </Button>
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
+                    {isLoading ? (
+                        // Skeleton Loader
+                        <div className="space-y-4">
+                            {Array.from({ length: itemsPerPage }).map((_, idx) => (
+                                <div
+                                    key={idx}
+                                    className="flex justify-between items-center border-b border-[#B6B6B6] px-4 py-4 animate-pulse"
+                                >
+                                    <div className="h-4 bg-gray-300 rounded w-32"></div>
+                                    <div className="h-4 bg-gray-300 rounded w-20"></div>
+                                    <div className="flex gap-2">
+                                        <div className="h-8 w-24 bg-gray-300 rounded"></div>
+                                        <div className="h-8 w-24 bg-gray-300 rounded"></div>
+                                    </div>
+                                </div>
                             ))}
-                        </TableBody>
-                    </Table>
+                        </div>
+                    ) : (
+                        <Table className="w-full">
+                            <TableHeader>
+                                <TableRow className="border-b border-t border-[#B6B6B6]">
+                                    <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-40">
+                                        Seller Name
+                                    </TableHead>
+                                    <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-40">
+                                        Status
+                                    </TableHead>
+                                    <TableHead className="text-center py-4 font-semibold text-gray-700 text-sm uppercase tracking-wide w-40">
+                                        Action
+                                    </TableHead>
+                                </TableRow>
+                            </TableHeader>
+
+                            <TableBody>
+                                {paginatedSellers.map((seller) => (
+                                    <TableRow key={seller._id} className="border-[#B6B6B6]">
+                                        <TableCell className="py-4 flex justify-center">
+                                            <p className="text-[#595959] text-[16px] font-medium">
+                                                {seller.userId.name}
+                                            </p>
+                                        </TableCell>
+
+                                        <TableCell className="text-center py-4 text-sm font-medium">
+                                            {seller.isApproved === "approved" ? (
+                                                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full">
+                                                    Approved
+                                                </span>
+                                            ) : seller.isApproved === "reject" ? (
+                                                <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full">
+                                                    Rejected
+                                                </span>
+                                            ) : (
+                                                <span className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full">
+                                                    Pending
+                                                </span>
+                                            )}
+                                        </TableCell>
+
+                                        <TableCell className="text-center px-4 py-4">
+                                            <div className="flex justify-center items-center gap-2">
+                                                <Select
+                                                    onValueChange={(value) =>
+                                                        statusMutation.mutate({ sellerId: seller._id, isApproved: value })
+                                                    }
+                                                >
+                                                    <SelectTrigger className="w-[120px] border-none shadow-none rounded-full h-8">
+                                                        <SelectValue placeholder="Action" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="approved">Approve</SelectItem>
+                                                        <SelectItem value="reject">Reject</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-8 px-2 hover:bg-blue-100 hover:text-blue-600 transition-colors"
+                                                    title="View Details"
+                                                    onClick={() => {
+                                                        setSelectedSellerId(seller._id);
+                                                        setOpen(true);
+                                                    }}
+                                                >
+                                                    <Eye className="w-4 h-4 mr-1" />
+                                                    View
+                                                </Button>
+
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-8 px-2 hover:bg-red-50 hover:text-red-600 transition-colors"
+                                                    title="Delete User"
+                                                    onClick={() => confirmDelete(seller._id)}
+                                                >
+                                                    <Trash2 className="w-4 h-4 mr-1" />
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    )}
                 </div>
 
                 {/* Pagination */}
@@ -280,6 +320,16 @@ const ListOfProfile = () => {
                 </div>
             </div>
 
+            {/* Delete Confirmation Modal */}
+            <ConfirmationModal
+                isOpen={deleteModalOpen}
+                onConfirm={handleDelete}
+                onCancel={() => setDeleteModalOpen(false)}
+                title="Delete Seller"
+                description="Are you sure you want to delete this seller? This action cannot be undone."
+                confirmText="Delete"
+                cancelText="Cancel"
+            />
             {/* Modal */}
             <SingelSellersProfile id={selectedSellerId} open={open} openChange={setOpen} />
         </div>

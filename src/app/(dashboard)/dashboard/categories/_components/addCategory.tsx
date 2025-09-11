@@ -15,7 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 // 1. Define Zod schema
 const categorySchema = z.object({
     name: z.string().min(1, "Category name is required"),
-    productType: z.array(z.string()),
+    productType: z.array(z.string()).min(1, "At least one product type is required"),
 });
 
 type CategoryFormValues = z.infer<typeof categorySchema>;

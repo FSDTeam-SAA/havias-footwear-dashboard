@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -22,7 +22,13 @@ interface SingelSellersProfileProps {
 
 interface SellerData {
     _id: string;
-    userId: string; // you may replace with object if needed
+    userId: {
+        _id: string;
+        name: string;
+        email: string;
+        role: string;
+        profileImage: string
+    }; // you may replace with object if needed
     businessEmail: string;
     companyName: string;
     taxId: string;
@@ -30,6 +36,7 @@ interface SellerData {
     comments?: string;
     createdAt: string;
     updatedAt: string;
+
 }
 
 interface SellerResponse {
@@ -74,6 +81,7 @@ const SingelSellersProfile: React.FC<SingelSellersProfileProps> = ({ id, open, o
                     <div className="space-y-4">
                         <div className="flex items-center gap-4 py-4">
                             <Avatar className="h-16 w-16">
+                                <AvatarImage src={seller.data.userId.profileImage} />
                                 <AvatarFallback>
                                     {seller.data.companyName?.charAt(0).toUpperCase()}
                                 </AvatarFallback>
@@ -100,14 +108,14 @@ const SingelSellersProfile: React.FC<SingelSellersProfileProps> = ({ id, open, o
                                     <span className="font-medium">Comments:</span> {seller.data.comments}
                                 </p>
                             )}
-                            <p>
+                            {/* <p>
                                 <span className="font-medium">Created At:</span>{" "}
                                 {new Date(seller.data.createdAt).toLocaleString()}
                             </p>
                             <p>
                                 <span className="font-medium">Updated At:</span>{" "}
                                 {new Date(seller.data.updatedAt).toLocaleString()}
-                            </p>
+                            </p> */}
                         </div>
 
                         <DialogFooter>
