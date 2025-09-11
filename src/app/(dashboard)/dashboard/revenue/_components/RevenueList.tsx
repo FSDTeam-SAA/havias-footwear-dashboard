@@ -82,31 +82,46 @@ const RevenueList = () => {
           </TableHeader>
 
           <TableBody>
-            {paginatedRevenues.map((seller) => (
-              <TableRow key={seller._id}>
-                <TableCell className="text-center px-4 py-4">
-                  <span className="text-base font-medium text-[#424242]">
-                    #{seller.sellerId}
-                  </span>
-                </TableCell>
-                <TableCell className="text-center px-4 py-4">
-                  <span className="text-base font-medium text-[#424242]">
-                    ${seller.totalRevenue.toFixed(2)}
-                  </span>
-                </TableCell>
-              </TableRow>
-            ))}
-
-            {isLoading && (
-              <TableRow>
-                <TableCell
-                  colSpan={2}
-                  className="text-center py-6 text-gray-500"
+            {isLoading
+              ? // Skeleton Loader
+              Array.from({ length: itemsPerPage }).map((_, idx) => (
+                <TableRow
+                  key={idx}
+                  className="animate-pulse border-b border-gray-200"
                 >
-                  Loading...
-                </TableCell>
-              </TableRow>
-            )}
+                  {/* Seller ID Skeleton */}
+                  <TableCell className="text-center px-4 py-4">
+                    <div className="h-4 w-24 bg-gray-300 rounded mx-auto"></div>
+                  </TableCell>
+
+                  {/* Revenue Skeleton */}
+                  <TableCell className="text-center px-4 py-4">
+                    <div className="h-4 w-20 bg-gray-300 rounded mx-auto"></div>
+                  </TableCell>
+                </TableRow>
+              ))
+              : paginatedRevenues.length > 0
+                ? paginatedRevenues.map((seller) => (
+                  <TableRow key={seller._id}>
+                    <TableCell className="text-center px-4 py-4">
+                      <span className="text-base font-medium text-[#424242]">
+                        #{seller.sellerId}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-center px-4 py-4">
+                      <span className="text-base font-medium text-[#424242]">
+                        ${seller.totalRevenue.toFixed(2)}
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                ))
+                : (
+                  <TableRow>
+                    <TableCell colSpan={2} className="text-center py-6 text-gray-500">
+                      No revenue data found
+                    </TableCell>
+                  </TableRow>
+                )}
           </TableBody>
         </Table>
 
@@ -142,8 +157,8 @@ const RevenueList = () => {
                 onClick={() => handlePageChange(page)}
                 variant={currentPage === page ? "default" : "outline"}
                 className={`h-9 w-9 p-0 ${currentPage === page
-                    ? "bg-gray-800 text-white hover:bg-gray-900"
-                    : "border-gray-300 hover:bg-gray-50"
+                  ? "bg-gray-800 text-white hover:bg-gray-900"
+                  : "border-gray-300 hover:bg-gray-50"
                   }`}
               >
                 {page}

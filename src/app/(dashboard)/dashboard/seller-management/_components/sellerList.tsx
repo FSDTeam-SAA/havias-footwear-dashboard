@@ -138,27 +138,37 @@ const SellerList = () => {
                         </TableHeader>
 
                         <TableBody>
-                            {isLoading ? (
-                                <TableRow>
-                                    <TableCell colSpan={3} className="text-center py-6">
-                                        Loading sellers...
-                                    </TableCell>
-                                </TableRow>
-                            ) : sellers.length > 0 ? (
-                                sellers.map((seller) => (
-                                    <TableRow
-                                        key={seller._id}
-                                        className="border-b border-t border-[#B6B6B6]"
-                                    >
-                                        <TableCell className="text-center text-sm font-medium text-[#595959]">
-                                            {seller.businessEmail}
+                            {isLoading
+                                ? // Skeleton Loader
+                                Array.from({ length: itemsPerPage }).map((_, idx) => (
+                                    <TableRow key={idx} className="animate-pulse border-b border-t border-[#B6B6B6]">
+                                        <TableCell className="py-4 text-center">
+                                            <div className="h-4 w-32 bg-gray-300 rounded mx-auto"></div>
                                         </TableCell>
+                                        <TableCell className="py-4 flex justify-center items-center gap-3">
+                                            <div className="h-10 w-10 bg-gray-300 rounded-full"></div>
+                                            <div className="h-4 w-24 bg-gray-300 rounded"></div>
+                                        </TableCell>
+                                        <TableCell className="py-4 flex justify-center items-center gap-2">
+                                            <div className="h-8 w-20 bg-gray-300 rounded"></div>
+                                            <div className="h-8 w-20 bg-gray-300 rounded"></div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                                : sellers.length > 0
+                                    ? sellers.map((seller) => (
+                                        <TableRow
+                                            key={seller._id}
+                                            className="border-b border-t border-[#B6B6B6]"
+                                        >
+                                            <TableCell className="text-center text-sm font-medium text-[#595959]">
+                                                {seller.businessEmail}
+                                            </TableCell>
 
-                                        <TableCell className="py-4 flex justify-center">
-                                            <div className="flex items-center gap-3">
+                                            <TableCell className="py-4 flex justify-center items-center gap-3">
                                                 <Avatar className="h-10 w-10">
                                                     <AvatarImage
-                                                        src="/default-avatar.png"
+                                                        src={seller.userId.profileImage}
                                                         alt={seller.userId.name}
                                                     />
                                                     <AvatarFallback>
@@ -168,47 +178,43 @@ const SellerList = () => {
                                                 <p className="text-[#595959] text-[16px] font-medium">
                                                     {seller.userId.name}
                                                 </p>
-                                            </div>
-                                        </TableCell>
+                                            </TableCell>
 
-                                        {/* Actions */}
-                                        <TableCell className="text-center px-4 py-4">
-                                            <div className="flex justify-center items-center gap-2">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="h-8 px-2 hover:bg-blue-100 hover:text-blue-600 transition-colors"
-                                                    title="View Details"
-                                                    onClick={() => {
-                                                        setOpen(true);
-                                                        setSelectedUserId(seller._id);
-                                                    }}
-                                                >
-                                                    <Eye className="w-4 h-4 mr-1" />
-                                                    View
-                                                </Button>
-                                                <Button
-                                                    onClick={() =>
-                                                        deleteSellerMutation.mutate(seller._id)
-                                                    }
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="h-8 px-2 hover:bg-red-50 hover:text-red-600 transition-colors"
-                                                    title="Delete"
-                                                >
-                                                    <Trash2 className="w-4 h-4 mr-1" />
-                                                </Button>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell colSpan={3} className="text-center py-6">
-                                        No sellers found
-                                    </TableCell>
-                                </TableRow>
-                            )}
+                                            <TableCell className="text-center px-4 py-4">
+                                                <div className="flex justify-center items-center gap-2">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-8 px-2 hover:bg-blue-100 hover:text-blue-600 transition-colors"
+                                                        title="View Details"
+                                                        onClick={() => {
+                                                            setOpen(true);
+                                                            setSelectedUserId(seller._id);
+                                                        }}
+                                                    >
+                                                        <Eye className="w-4 h-4 mr-1" />
+                                                        View
+                                                    </Button>
+                                                    <Button
+                                                        onClick={() => deleteSellerMutation.mutate(seller._id)}
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-8 px-2 hover:bg-red-50 hover:text-red-600 transition-colors"
+                                                        title="Delete"
+                                                    >
+                                                        <Trash2 className="w-4 h-4 mr-1" />
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                    : (
+                                        <TableRow>
+                                            <TableCell colSpan={3} className="text-center py-6">
+                                                No sellers found
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
                         </TableBody>
                     </Table>
                 </div>

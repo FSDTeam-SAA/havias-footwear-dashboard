@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import Title from "../../_components/Title";
 import { Loader2, Save } from "lucide-react";
 import { TagsInput } from "@/components/ui/tagsInput";
@@ -93,7 +93,7 @@ export default function AddSubCategories() {
                 <CardContent>
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                         {/* Category Dropdown using ShadCN Select */}
-                          <p className="text-[#272727] font-semibold text-[20px] mb-2">General Information</p>
+                        <p className="text-[#272727] font-semibold text-[20px] mb-2">General Information</p>
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-[#595959]">Select Category</label>
                             <Controller

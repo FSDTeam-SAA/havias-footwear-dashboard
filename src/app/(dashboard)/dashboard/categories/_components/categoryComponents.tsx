@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Edit, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -13,16 +13,20 @@ import {
 } from "@/components/ui/table";
 import Link from "next/link";
 import Title from "../../_components/Title";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { CategoryResponse, Category } from "../../../../../../types/categoryDataType";
+import { toast } from "sonner";
+import ConfirmationModal from "@/components/confirmationModal";
 
 const CategoryList = () => {
   const itemsPerPage = 7;
   const [currentPage, setCurrentPage] = useState(1);
   const session = useSession();
   const token = (session?.data?.user as { accessToken: string })?.accessToken;
-
+  const queryClient = useQueryClient();
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
   const { data, isLoading, isError } = useQuery<CategoryResponse>({
     queryKey: ["categories", currentPage],
     queryFn: async () => {
@@ -49,6 +53,39 @@ const CategoryList = () => {
     setCurrentPage(page);
   };
 
+
+
+  const categoriesDeleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/category/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to delete categories");
+      }
+
+      return res.json();
+    },
+    onSuccess: (data) => {
+      setDeleteModalOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      toast.success(data.message || "categories deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to delete categories");
+    },
+  });
+
+
   if (isLoading) {
     return <div className="p-6 text-gray-600">Loading categories...</div>;
   }
@@ -56,6 +93,24 @@ const CategoryList = () => {
   if (isError) {
     return <div className="p-6 text-red-600">Failed to load categories.</div>;
   }
+
+
+
+
+  // Open delete confirmation modal
+  const confirmDelete = (sellerId: string) => {
+    setCategoryToDelete(sellerId);
+    setDeleteModalOpen(true);
+  };
+
+
+  const handleDelete = () => {
+    if (categoryToDelete) categoriesDeleteMutation.mutate(categoryToDelete);
+    setCategoryToDelete(null);
+  };
+
+
+
 
   return (
     <div className="">
@@ -122,29 +177,21 @@ const CategoryList = () => {
                 <TableCell className="text-center px-4 py-4">
                   <div className="flex justify-center items-center gap-2">
                     <Link href={`/dashboard/categories/edit/${category._id}`}>
-                      <Button
+                      {/* <Button
                         variant="ghost"
                         size="sm"
                         className="h-8 w-8 p-0 hover:bg-green-100 hover:text-green-600 transition-colors"
                         title="Edit Category"
                       >
                         <Edit className="w-4 h-4" />
-                      </Button>
+                      </Button> */}
                     </Link>
                     <Button
                       variant="ghost"
                       size="sm"
                       className="h-8 w-8 p-0 hover:bg-red-100 hover:text-red-600 transition-colors"
                       title="Delete Category"
-                      onClick={() => {
-                        if (
-                          confirm(
-                            `Are you sure you want to delete "${category.name}"?`
-                          )
-                        ) {
-                          // TODO: Add delete mutation
-                        }
-                      }}
+                      onClick={() => confirmDelete(category._id)}
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
@@ -209,6 +256,15 @@ const CategoryList = () => {
           </Button>
         </div>
       </div>
+      <ConfirmationModal
+        isOpen={deleteModalOpen}
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteModalOpen(false)}
+        title={`Delete Category `}
+        description="Are you sure you want to delete this category? This action cannot be undone."
+        confirmText={`Delete ${categoriesDeleteMutation.isPending ? "..." : ""}`}
+        cancelText="Cancel"
+      />
     </div>
   );
 };
