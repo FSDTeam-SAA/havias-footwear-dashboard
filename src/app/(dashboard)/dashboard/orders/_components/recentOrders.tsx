@@ -11,14 +11,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-    Pagination,
-    PaginationContent,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-} from "@/components/ui/pagination";
+
 import {
     Dialog,
     DialogContent,
@@ -30,6 +23,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { Order, OrderResponse } from "../../../../../../types/orderDataType";
+import Image from "next/image";
 
 const itemsPerPage = 7;
 
@@ -59,7 +53,8 @@ const RecentOrders = () => {
     });
 
     const orders = data?.data || [];
-    const totalPages = data?.meta?.totalPages || 1;
+    const meta = data?.meta;
+    const totalPages = meta ? Math.ceil(meta.total / meta.limit) : 1;
 
     return (
         <div>
@@ -101,15 +96,17 @@ const RecentOrders = () => {
                                     order.items.map((item) => (
                                         <TableRow key={item._id}>
                                             <TableCell className="py-4  flex gap-3 items-center">
-                                                <Avatar className="h-12 w-12">
-                                                    <AvatarImage
+                                                {/* <Avatar className="h-12 w-12">
+                                                    <AvatarImage 
+                                                      className="rounded-lg"
                                                         src={item.product?.images[0] || ""}
                                                         alt={item.product?.title || "N/A"}
                                                     />
                                                     <AvatarFallback>
                                                         {item.product?.title?.charAt(0).toUpperCase() || "N/A"}
                                                     </AvatarFallback>
-                                                </Avatar>
+                                                </Avatar> */}
+                                                <Image src={item.product?.images[0] || ""} alt={item.product?.title || "N/A"} width={80} height={80} className="rounded-lg" />
                                                 <p className="text-[#595959] text-[16px] font-medium">
                                                     {item.product?.title?.slice(0, 10) || "N/A"}
                                                 </p>
@@ -130,57 +127,62 @@ const RecentOrders = () => {
                 </div>
 
                 {/* ✅ Pagination */}
-                <div className="flex flex-col md:flex-row md:justify-between md:items-center px-6 py-4 bg-gray-50 border-t border-gray-200 gap-4">
-                    <p className="text-sm text-gray-600">
-                        Showing{" "}
-                        <span className="font-medium">
-                            {(currentPage - 1) * itemsPerPage + 1}
-                        </span>{" "}
-                        to{" "}
-                        <span className="font-medium">
-                            {Math.min(currentPage * itemsPerPage, data?.meta?.total || 0)}
-                        </span>{" "}
-                        of <span className="font-medium">{data?.meta?.total || 0}</span> results
-                    </p>
+                {meta && (
+                    <div className="flex  flex-col sm:flex-row sm:items-center sm:justify-between px-6 py-4 bg-gray-50 border-t border-gray-200">
+                        <div className="mb-2 sm:mb-0">
+                            <p className="text-sm text-gray-600">
+                                Showing{" "}
+                                <span className="font-medium">
+                                    {(meta.page - 1) * meta.limit + 1}
+                                </span>{" "}
+                                to{" "}
+                                <span className="font-medium">
+                                    {Math.min(meta.page * meta.limit, meta.total)}
+                                </span>{" "}
+                                of <span className="font-medium">{meta.total}</span> results
+                            </p>
+                        </div>
 
-                    <Pagination>
-                        <PaginationContent>
-                            <PaginationItem>
-                                <PaginationPrevious
-                                    href="#"
-                                    onClick={() =>
-                                        currentPage > 1 && setCurrentPage(currentPage - 1)
-                                    }
-                                    className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
-                                />
-                            </PaginationItem>
+                        <div className="flex items-center space-x-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setCurrentPage((p) => p - 1)}
+                                disabled={meta.page === 1}
+                                className="h-9 w-9 p-0 border-gray-300 disabled:opacity-50"
+                            >
+                                ‹
+                            </Button>
 
-                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                                <PaginationItem key={page}>
-                                    <PaginationLink
-                                        href="#"
-                                        isActive={currentPage === page}
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                                (page) => (
+                                    <Button
+                                        key={page}
+                                        size="sm"
                                         onClick={() => setCurrentPage(page)}
+                                        variant={meta.page === page ? "default" : "outline"}
+                                        className={`h-9 w-9 p-0 ${meta.page === page
+                                            ? "bg-gray-800 text-white hover:bg-gray-900"
+                                            : "border-gray-300 hover:bg-gray-50"
+                                            }`}
                                     >
                                         {page}
-                                    </PaginationLink>
-                                </PaginationItem>
-                            ))}
+                                    </Button>
+                                )
+                            )}
 
-                            <PaginationItem>
-                                <PaginationNext
-                                    href="#"
-                                    onClick={() =>
-                                        currentPage < totalPages && setCurrentPage(currentPage + 1)
-                                    }
-                                    className={
-                                        currentPage === totalPages ? "pointer-events-none opacity-50" : ""
-                                    }
-                                />
-                            </PaginationItem>
-                        </PaginationContent>
-                    </Pagination>
-                </div>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setCurrentPage((p) => p + 1)}
+                                disabled={meta.page === totalPages}
+                                className="h-9 w-9 p-0 border-gray-300 disabled:opacity-50"
+                            >
+                                ›
+                            </Button>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* ✅ Modal */}

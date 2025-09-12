@@ -210,7 +210,7 @@ export default function EditBlog({ id }: { id: string }) {
                   placeholder="Enter blog description..."
                   modules={quillModules}
                   formats={quillFormats}
-                  className="h-[250px]"
+                  className="h-[350px]"
                 />
               </div>
             </CardContent>
@@ -249,13 +249,13 @@ export default function EditBlog({ id }: { id: string }) {
                     <X size={16} />
                   </button>
                   <div className="mt-3 text-center">
-                    <button
+                    <Button
                       onClick={handleUploadClick}
-                      className="text-sm text-blue-600 hover:text-blue-700 underline"
+                      className="text-sm text-white underline"
                       type="button"
                     >
                       Change image
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ) : (
