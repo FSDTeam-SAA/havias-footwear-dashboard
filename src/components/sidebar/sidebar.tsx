@@ -43,6 +43,7 @@ const navigation: NavItem[] = [
   },
   { name: "Product", href: "/dashboard/product", icon: Grip },
   { name: "Product Request", href: "/dashboard/request-product", icon: CheckCheck },
+    { name: "Colors", href: "/dashboard/colors", icon: Grip },
   { name: "Order", href: "/dashboard/orders", icon: Handbag },
   { name: "Revenue from Seller", href: "/dashboard/revenue", icon: DollarSign },
   { name: "Blog management", href: "/dashboard/blog", icon: AppWindow },
