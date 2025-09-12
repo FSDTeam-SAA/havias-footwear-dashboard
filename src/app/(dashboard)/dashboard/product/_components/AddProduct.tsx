@@ -32,6 +32,7 @@ import { TagsInput } from "@/components/ui/tagsInput";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
+import { ColorsResponse } from "../../../../../../types/colorDataTypes";
 
 // React Quill Setup
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
@@ -71,7 +72,7 @@ const formSchema = z.object({
   subCategory: z.string().nonempty("Category is required"),
   brandName: z.string().optional(),
   size: z.array(z.string()).min(1, "At least one size is required"),
-  color: z.array(z.string()).min(1, "At least one color is required"),
+  color: z.string().nonempty("Color is required"),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -102,7 +103,7 @@ export default function AddProduct() {
       subCategory: "",
       brandName: "",
       size: [],
-      color: [],
+      color: "",
     },
   });
 
@@ -123,31 +124,24 @@ export default function AddProduct() {
     enabled: !!token,
   });
 
-  // Fetch subcategories when category changes
-  // useEffect(() => {
-  //   if (!selectedCategory) return;
 
-  //   setProductTypes(selectedCategory.productType || []);
-  //   form.setValue("productType", "");
-
-  //   const fetchSubCategories = async () => {
-  //     const res = await fetch(
-  //       `${process.env.NEXT_PUBLIC_BACKEND_URL}/sub-category/category/${selectedCategory._id}`,
-  //       { headers: { Authorization: `Bearer ${token}` } }
-  //     );
-  //     if (!res.ok) {
-  //       setDeactive(true);
-  //       // toast.error("Failed to fetch subcategories");
-  //       return;
-  //     }
-  //     const data = await res.json();
-  //     setSubCategories(data.data.subCategories || []);
-  //     form.setValue("subCategory", ""); // reset subcategory
-  //   };
-
-  //   fetchSubCategories();
-  // }, [selectedCategory, token, form]);
-
+  const { data: colorsData } = useQuery<ColorsResponse>({
+    queryKey: ["color"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/color?page=${1}&limit=${50}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (!res.ok) throw new Error("Failed to fetch colors");
+      return res.json();
+    },
+    enabled: !!token,
+  });
 
 
   useEffect(() => {
@@ -252,7 +246,9 @@ export default function AddProduct() {
 
     // Append arrays
     data.size?.forEach((s) => body.append("sizes[]", s));
-    data.color?.forEach((c) => body.append("colors[]", c));
+    if (data.color) {
+      body.append("colors[]", data.color); // backend will see ["red"]
+    }
 
     createProductMutation.mutate(body);
   };
@@ -466,26 +462,37 @@ export default function AddProduct() {
                 </CardContent>
               </Card>
 
-              {/* Color Tags Input */}
+              {/* Color Select */}
               <Card>
                 <CardContent>
-                  <Label className="text-sm font-medium text-[#595959]">Color</Label>
-                  <Controller
-                    name="color"
+                  <FormField
                     control={form.control}
+                    name="color"
                     render={({ field }) => (
-                      <TagsInput
-                        value={field.value ?? []}
-                        onValueChange={field.onChange}
-                        placeholder="Enter colors here..."
-                      />
+                      <FormItem>
+                        <FormLabel>Color</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <SelectTrigger className="h-[50px] border border-[#B6B6B6]">
+                            <SelectValue placeholder="Select a color" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {colorsData?.data.data.map((clr: any) => (
+                              <SelectItem key={clr._id} value={clr._id}>
+                                <div className="flex items-center gap-2">
+                                  <span
+                                    className="w-4 h-4 rounded-full border"
+                                    style={{ backgroundColor: clr.code }}
+                                  />
+                                  {clr.name}
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
                     )}
                   />
-                  {form.formState.errors.color && (
-                    <p className="text-red-500 text-sm">
-                      {form.formState.errors.color.message as string}
-                    </p>
-                  )}
                 </CardContent>
               </Card>
             </div>

@@ -199,7 +199,7 @@ export default function AddBlog() {
           disabled={addBlogMutation.isPending}
           className="bg-gray-700 text-base h-[50px] hover:bg-gray-800 text-white px-6"
         >
-          Save Blog {addBlogMutation.isPending && <Loader2 className="animate-spin" />}
+          Add Blog {addBlogMutation.isPending && <Loader2 className="animate-spin" />}
         </Button>
       </div>
 
@@ -243,7 +243,7 @@ export default function AddBlog() {
                   onChange={handleDescriptionImageSelect}
                   accept="image/*"
                   multiple
-                  className="hidden"
+                  className="hidden h-[300px]"
                 />
                 {/* <Button
                   onClick={handleDescriptionImageUpload}
@@ -288,13 +288,13 @@ export default function AddBlog() {
                     <X size={16} />
                   </button>
                   <div className="mt-3 text-center">
-                    <button
+                    <Button
                       onClick={handleUploadClick}
-                      className="text-sm text-blue-600 hover:text-blue-700 underline"
+                      className="text-sm text-white underline"
                       type="button"
                     >
                       Change image
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ) : (

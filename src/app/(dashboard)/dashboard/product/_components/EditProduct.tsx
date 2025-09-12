@@ -33,6 +33,7 @@ import { TagsInput } from "@/components/ui/tagsInput";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
+import { ColorsResponse } from "../../../../../../types/colorDataTypes";
 
 // React Quill Setup
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
@@ -73,7 +74,7 @@ const formSchema = z.object({
   subCategory: z.string().optional(),
   brandName: z.string().optional(),
   size: z.array(z.string()).optional(),
-  color: z.array(z.string()).optional(),
+  color: z.string().nonempty("Color is required"),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -108,7 +109,7 @@ export default function EditProduct({ id }: { id: string }) {
       subCategory: "",
       brandName: "",
       size: [],
-      color: [],
+      color: "",
     },
   });
 
@@ -140,6 +141,20 @@ export default function EditProduct({ id }: { id: string }) {
     enabled: !!token && !!id,
   });
 
+  // Fetch colors
+  const { data: colorsData } = useQuery<ColorsResponse>({
+    queryKey: ["colors"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/color?page=${1}&limit=${50}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!res.ok) throw new Error("Failed to fetch colors");
+      return res.json();
+    },
+    enabled: !!token,
+  });
+
   // Set form values and images when product and categories data are available
   useEffect(() => {
     if (product && categoriesData) {
@@ -154,7 +169,6 @@ export default function EditProduct({ id }: { id: string }) {
         setSelectedCategory(initialCategory);
         setProductTypes(initialCategory.productType || []);
       }
-
       // Reset form after productTypes are set
       form.reset({
         title: productData.title || "",
@@ -166,7 +180,7 @@ export default function EditProduct({ id }: { id: string }) {
         description: productData.description || "",
         brandName: productData.brand || "",
         size: productData.sizes || [],
-        color: productData.colors || [],
+        color: productData.colors?.[0]?._id || "",
         category: productData.category?._id || "",
         productType: productData.productType || "",
         subCategory: productData.subCategory?._id || "",
@@ -283,7 +297,9 @@ export default function EditProduct({ id }: { id: string }) {
 
     // Append arrays
     data.size?.forEach((s) => body.append("sizes[]", s));
-    data.color?.forEach((c) => body.append("colors[]", c));
+    if (data.color) {
+      body.append("colors[]", data.color);
+    }
 
     // Append the list of images to be removed.
     removedImages.forEach((img) => body.append("removedImages[]", img));
@@ -479,9 +495,9 @@ export default function EditProduct({ id }: { id: string }) {
               </Card>
 
               {/* Size Tags Input */}
-              <Card>
+              <Card >
                 <CardContent>
-                  <Label className="text-sm font-medium text-[#595959]">Size</Label>
+                  <Label className="text-sm font-medium  text-[#595959]">Size</Label>
                   <Controller
                     name="size"
                     control={form.control}
@@ -504,60 +520,42 @@ export default function EditProduct({ id }: { id: string }) {
               {/* Color Tags Input */}
               <Card>
                 <CardContent>
-                  <Label className="text-sm font-medium text-[#595959]">Color</Label>
-                  <Controller
-                    name="color"
-                    control={form.control}
-                    render={({ field }) => (
-                      <TagsInput
-                        value={field.value ?? []}
-                        onValueChange={field.onChange}
-                        placeholder="Enter colors here..."
-                      />
-                    )}
-                  />
-                  {form.formState.errors.color && (
-                    <p className="text-red-500 text-sm">
-                      {form.formState.errors.color.message as string}
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Right Column */}
-            <div className="space-y-4">
-              {/* Status */}
-              {/* <Card>
-                <CardContent className="p-6">
                   <FormField
                     control={form.control}
-                    name="status"
+                    name="color"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Status</FormLabel>
-                        <FormControl>
-                          <RadioGroup
-                            value={field.value}
-                            onValueChange={field.onChange}
-                            className="flex gap-6"
-                          >
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="deactive" id="deactive" />
-                              <Label htmlFor="deactive">Deactive</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="active" id="active" />
-                              <Label htmlFor="active">Active</Label>
-                            </div>
-                          </RadioGroup>
-                        </FormControl>
+                        <FormLabel>Color</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <SelectTrigger className="h-[50px] border border-[#B6B6B6]">
+                            <SelectValue placeholder="Select a color" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {colorsData?.data.data.map((clr: any) => (
+                              <SelectItem key={clr._id} value={clr._id}>
+                                <div className="flex items-center gap-2">
+                                  <span
+                                    className="w-4 h-4 rounded-full border"
+                                    style={{ backgroundColor: clr.code }}
+                                  />
+                                  {clr.name}
+                                </div>
+                              </SelectItem>
+
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
                 </CardContent>
-              </Card> */}
+              </Card>
 
+            </div>
+
+            {/* Right Column */}
+            <div className="space-y-4">
               {/* Category */}
               <Card>
                 <CardContent>

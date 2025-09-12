@@ -80,7 +80,7 @@ export function RevenueReport() {
   }, [data, period])
 
   return (
-    <Card>
+    <Card className="shadow bg-white rounded-lg p-3">
       <CardHeader className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
         <div>
           <CardTitle className="mb-4">Revenue Report</CardTitle>
@@ -89,11 +89,10 @@ export function RevenueReport() {
           {["Day", "Week", "Month", "Year"].map((p) => (
             <button
               key={p}
-              className={`px-3 py-2 rounded-lg text-sm font-medium ${
-                period.toLowerCase() === p.toLowerCase()
-                  ? "bg-btnPrimary text-white"
-                  : "text-[#595959]"
-              }`}
+              className={`px-3 py-2 rounded-lg text-sm font-medium ${period.toLowerCase() === p.toLowerCase()
+                ? "bg-btnPrimary text-white"
+                : "text-[#595959]"
+                }`}
               onClick={() =>
                 setPeriod(p.toLowerCase() as "day" | "week" | "month" | "year")
               }
@@ -104,7 +103,7 @@ export function RevenueReport() {
         </div>
       </CardHeader>
       <CardContent>
-        <div style={{ width: "100%", height: 280 }} className="flex items-center justify-center">
+        <div style={{ width: "100%", height: 380 }} className="flex items-center justify-center">
           {/* Loading State */}
           {isLoading && (
             <div className="w-full h-full flex items-center justify-center">
