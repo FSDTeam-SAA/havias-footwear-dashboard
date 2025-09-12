@@ -22,7 +22,7 @@ export function ProductTable() {
   const [statusFilter, setStatusFilter] = useState<string>("");
 
   const { data, isLoading } = useQuery<ProductResponse>({
-    queryKey: ["products", currentPage, statusFilter],
+    queryKey: ["requestsProduct", currentPage, statusFilter],
     queryFn: async () => {
  const statusQuery =
     statusFilter && statusFilter !== "all"
@@ -65,7 +65,7 @@ export function ProductTable() {
     },
     onSuccess: () => {
       toast.success("Status updated successfully");
-      queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["requestsProduct"] });
     },
     onError: (error) => {
       toast.error(error.message || "Status update failed");
