@@ -40,19 +40,20 @@ export const authOptions: NextAuthOptions = {
           );
 
           const response = await res.json();
-     
-          if (!res.ok || !response?.status) {
+          if (!res.ok || !response?.success) {
             throw new Error(response?.message || "Login failed");
           }
-        //   if (response.data.user.role === "USER") {
-        //     throw new Error("Only admin can access this page");
-        //   }
+            if (response.data.user.role === "user") {
+              throw new Error("Only admin can access this page");
+            
+            }
           const { user, accessToken } = response.data;
 
           return {
             id: user._id,
             name: user.name,
             email: user.email,
+            phoneNumber: user.phoneNumber,
             role: user.role,
             profileImage: user.profileImage,
             accessToken,
@@ -76,6 +77,7 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.name = user.name;
         token.email = user.email;
+        token.phoneNumber = user.phoneNumber;
         token.role = user.role;
         token.profileImage = user.profileImage;
         token.accessToken = user.accessToken;
@@ -89,6 +91,7 @@ export const authOptions: NextAuthOptions = {
         id: token.id,
         name: token.name,
         email: token.email,
+        phoneNumber: token.phoneNumber,
         role: token.role,
         profileImage: token.profileImage,
         accessToken: token.accessToken,

@@ -6,13 +6,16 @@ export async function middleware(request: NextRequest) {
         req: request,
         secret: process.env.NEXTAUTH_SECRET,
     });
-    if (!token?.accessToken) {
+  
+
+    if (!token || token?.role !== "admin") {
         return NextResponse.redirect(new URL("/login", request.url));
     }
+  
 
     return NextResponse.next();
 }
 
 export const config = {
-    matcher: ["/account", "/account/:path*"],
+    matcher: ["/dashboard", "/dashboard/:path*"],
 };

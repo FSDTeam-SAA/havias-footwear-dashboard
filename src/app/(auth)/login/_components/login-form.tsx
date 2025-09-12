@@ -18,10 +18,9 @@ import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import Link from "next/link";
+// import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   email: z.string().email({
@@ -35,7 +34,6 @@ const formSchema = z.object({
 
 const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -47,6 +45,30 @@ const LoginForm = () => {
   });
 
   // 2. Define a submit handler.
+  // async function onSubmit(values: z.infer<typeof formSchema>) {
+  //   try {
+  //     setIsLoading(true);
+
+  //     const res = await signIn("credentials", {
+  //       email: values?.email,
+  //       password: values?.password,
+  //       redirect: false,
+  //     });
+
+  //     if (res?.error) {
+  //       throw new Error(res.error);
+  //     }
+
+  //     toast.success("Login successful!");
+  //     router.push("/");
+  //   } catch (error) {
+  //     console.error("Login failed:", error);
+  //     toast.error((error as Error).message);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true);
@@ -58,18 +80,21 @@ const LoginForm = () => {
       });
 
       if (res?.error) {
-        throw new Error(res.error);
+        toast.error(res.error);
+        return;
       }
 
       toast.success("Login successful!");
-      router.push("/");
+      document.location.href = "/";
     } catch (error) {
       console.error("Login failed:", error);
-      toast.error((error as Error).message);
+      toast.error((error as Error).message || "Something went wrong");
     } finally {
       setIsLoading(false);
     }
   }
+
+
   return (
     <div>
       <div className="w-full md:w-[547px] p-3 md:p-7 lg:p-8 rounded-[16px] bg-white">
@@ -183,12 +208,12 @@ const LoginForm = () => {
                     </Label>
                     <FormMessage className="text-red-500" />
                   </FormItem>
-                  <Link
+                  {/* <Link
                     className="text-sm font-medium text-[#293440] leading-[120%] hover:underline"
                     href="/forgot-password"
                   >
                     Forgot Password?
-                  </Link>
+                  </Link> */}
                 </div>
               )}
             />

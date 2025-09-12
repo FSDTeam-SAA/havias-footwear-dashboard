@@ -9,92 +9,187 @@ import {
   DollarSign,
   LogOut,
   Grip,
-  ShoppingBasket,
   Columns3Cog,
   AppWindow,
   User2,
   UserCheck,
   Users,
   Settings,
-  // Bell,
+  Handbag,
+  ChevronDown,
+  ChevronRight,
+  CheckCheck,
 } from "lucide-react";
 import Image from "next/image";
-// import logoImage from "@/public/images/logo.svg";
+import { useEffect, useState } from "react";
+import { LogoutModal } from "../logoutModal";
 
-const navigation = [
-  { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Categories", href: "/categories", icon: Columns3Cog },
-  { name: "Product", href: "/product", icon: Grip },
-  { name: "Request Product", href: "/request-product", icon: ShoppingBasket }, 
-  { name: "Revenue from Seller ", href: "/revenue  ", icon: DollarSign },
-  { name: "Blog management", href: "/blog", icon: AppWindow },
-  { name: "Seller Management", href: "/seller-management", icon: User2 },
-  { name: "Seller Profile Request ", href: "/seller-profile-request", icon: UserCheck },
-  { name: "Buyer Profile ", href: "/buyer-profile", icon: Users },
-  { name: "Setting ", href: "/setting", icon: Settings },
+type NavItem = {
+  name: string;
+  href?: string;
+  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  children?: { name: string; href: string }[];
+};
 
+const navigation: NavItem[] = [
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  {
+    name: "Categories",
+    icon: Columns3Cog,
+    children: [
+      { name: "Category List", href: "/dashboard/categories" },
+      { name: "Add Sub Category", href: "/dashboard/categories/add-sub-categories" },
+    ],
+  },
+  { name: "Product", href: "/dashboard/product", icon: Grip },
+  { name: "Product Request", href: "/dashboard/request-product", icon: CheckCheck },
+  { name: "Order", href: "/dashboard/orders", icon: Handbag },
+  { name: "Revenue from Seller", href: "/dashboard/revenue", icon: DollarSign },
+  { name: "Blog management", href: "/dashboard/blog", icon: AppWindow },
+  { name: "Seller Management", href: "/dashboard/seller-management", icon: User2 },
+  { name: "Seller Profile Request", href: "/dashboard/seller-profile-request", icon: UserCheck },
+  { name: "Buyer Profile", href: "/dashboard/buyer-profile", icon: Users },
+  { name: "Setting", href: "/dashboard/setting", icon: Settings },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  // Auto-open dropdown if current path is inside children
+  useEffect(() => {
+    const activeDropdown = navigation.find(
+      (item) =>
+        item.children &&
+        item.children.some((child) => pathname.startsWith(child.href))
+    );
+    setOpenDropdown(activeDropdown ? activeDropdown.name : null);
+  }, [pathname]);
 
   return (
     <div className="flex h-screen sticky bottom-0 top-0 w-[350px] flex-col bg-[#1C2228] z-50">
+      {/* Logo */}
       <div className="h-[80px] flex items-center justify-start shadow-md px-4">
         <Image
           src={logo}
           alt="Company Logo"
-          height={60} // Adjust height to fit navbar
-          width={150} // Adjust width proportionally
+          height={60}
+          width={150}
           className="object-contain"
-          priority // for faster loading
+          priority
         />
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-6 flex flex-col items-center justify-start px-3 overflow-y-auto mt-3">
+      <nav className="flex-1 space-y-3 flex hide-scrollbar flex-col items-center justify-start px-3 overflow-y-auto mt-3">
         {navigation.map((item) => {
-          const isActive =
-            pathname === item.href ||
-            (item.href !== "/" && pathname.startsWith(item.href));
+          let isActive = false;
 
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={cn(
-                "flex w-[90%] mx-auto items-center justify-start gap-2 space-y-1 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
-                isActive
-                  ? "bg-btnPrimary text-white"
-                  : "text-white hover:bg-btnPrimary/70 hover:text-white"
-              )}
-            >
-              <item.icon
-                className={cn(
-                  "h-6 w-6 transition-colors duration-200",
-                  isActive ? "text-white" : ""
+          if (item.children) {
+            isActive = item.children.some((child) => pathname === child.href);
+          } else if (item.href) {
+            isActive = pathname === item.href;
+          }
+
+          // Dropdown
+          if (item.children && item.icon) {
+            const isOpen = openDropdown === item.name;
+            return (
+              <div key={item.name} className="w-[90%] mx-auto">
+                <Link
+                  href="/dashboard/categories" // parent route
+                  onClick={(e) => {
+                    // If already open, just toggle
+                    if (isOpen) {
+                      e.preventDefault();
+                      setOpenDropdown(null);
+                    } else {
+                      setOpenDropdown(item.name);
+                    }
+                  }}
+                  className={cn(
+                    "flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
+                    pathname.startsWith("/dashboard/categories")
+                      ? "bg-btnPrimary text-white"
+                      : "text-white hover:bg-btnPrimary/70 hover:text-white"
+                  )}
+                >
+                  <div className="flex items-center gap-2">
+                    <item.icon className="h-6 w-6" />
+                    <span className="text-base">{item.name}</span>
+                  </div>
+                  {isOpen ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
+                </Link>
+
+                {/* Dropdown children */}
+                {isOpen && (
+                  <div className="ml-8 mt-2 space-y-1">
+                    {item.children.map((child) => {
+                      const childActive = pathname === child.href;
+                      return (
+                        <Link
+                          key={child.name}
+                          href={child.href}
+                          className={cn(
+                            "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
+                            childActive
+                              ? "bg-btnPrimary text-white"
+                              : "text-white hover:bg-btnPrimary/70 hover:text-white"
+                          )}
+                        >
+                          <span className="text-base">{child.name}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
                 )}
-              />
-              <span
+              </div>
+            );
+          }
+
+          // Regular items
+          if (item.href && item.icon) {
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
                 className={cn(
-                  "font-normal text-base leading-[120%] transition-colors duration-200 text-center",
-                  isActive ? "text-white font-medium" : ""
+                  "flex w-[90%] mx-auto items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
+                  isActive
+                    ? "bg-btnPrimary text-white"
+                    : "text-white hover:bg-btnPrimary/70 hover:text-white"
                 )}
               >
-                {item.name}
-              </span>
-            </Link>
-          );
+                <item.icon className="h-6 w-6" />
+                <span className="text-base">{item.name}</span>
+              </Link>
+            );
+          }
+
+          return null;
         })}
       </nav>
 
-      {/* Logout fixed at bottom */}
-      <div className="p-3">
-        <div className="flex items-center justify-start space-y-1 rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition-all duration-200 hover:bg-slate-600/50 hover:text-white cursor-pointer">
+      {/* Logout */}
+      <div
+        onClick={() => setIsLogoutModalOpen(true)}
+        className="p-3 cursor-pointer"
+      >
+        <div className="flex items-center justify-start space-y-1 rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition-all duration-200 hover:bg-slate-600/50 hover:text-white">
           <LogOut className="h-5 w-5" />
-          <span className="font-normal text-base leading-[120%]">Log Out</span>
+          <span className="font-normal text-base leading-[120%]">
+            Log Out
+          </span>
         </div>
       </div>
+      <LogoutModal
+        open={isLogoutModalOpen}
+        onOpenChange={setIsLogoutModalOpen}
+      />
     </div>
   );
 }
