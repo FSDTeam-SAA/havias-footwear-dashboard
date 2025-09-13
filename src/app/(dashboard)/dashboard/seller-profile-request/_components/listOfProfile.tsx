@@ -82,6 +82,7 @@ const ListOfProfile = () => {
         },
         onSuccess: () => {
             toast.success("Status updated successfully");
+            queryClient.invalidateQueries({ queryKey: ["sellers"] });
 
         },
         onError: (error) => {
@@ -163,7 +164,7 @@ const ListOfProfile = () => {
             </div>
 
             {/* Table Section */}
-            <div className="w-full mt-6">
+            <div className="w-full flex-1 h-full mt-6">
                 <div className="overflow-x-auto">
                     {isLoading ? (
                         // Skeleton Loader

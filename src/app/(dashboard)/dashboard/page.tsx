@@ -14,7 +14,7 @@ function Page() {
         <OverviewCard />
         <RevenueReport />
       </div>
-      <div className='bg-[#fafafafa] py-[69px] px-14 mt-10 rounded-xl'>
+      <div className='bg-[#fafafafa] pt-[69px] pb-2 px-14 mt-10 rounded-xl'>
         <div className='flex justify-between items-center'>
           <h1 className='text-3xl font-semibold '>Recent Orders</h1>
           <Link href={"/dashboard/orders"}>
