@@ -9,7 +9,10 @@ function Page() {
 
   return (
     <div className=''>
-      <Title title="Over View" active="Dashboard" />
+      <Title
+            title="Dashboard"
+            active="Dashboard > Overview"
+          />
       <div className='space-y-[32px]'>
         <OverviewCard />
         <RevenueReport />

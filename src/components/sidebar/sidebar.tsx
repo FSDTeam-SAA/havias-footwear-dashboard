@@ -38,17 +38,32 @@ const navigation: NavItem[] = [
     icon: Columns3Cog,
     children: [
       { name: "Category List", href: "/dashboard/categories" },
-      { name: "Add Sub Category", href: "/dashboard/categories/add-sub-categories" },
+      {
+        name: "Add Sub Category",
+        href: "/dashboard/categories/add-sub-categories",
+      },
     ],
   },
   { name: "Product", href: "/dashboard/product", icon: Grip },
-  { name: "Product Request", href: "/dashboard/request-product", icon: CheckCheck },
-    { name: "Colors", href: "/dashboard/colors", icon: Grip },
+  {
+    name: "Product Request",
+    href: "/dashboard/request-product",
+    icon: CheckCheck,
+  },
+  { name: "Colors", href: "/dashboard/colors", icon: Grip },
   { name: "Order", href: "/dashboard/orders", icon: Handbag },
   { name: "Revenue from Seller", href: "/dashboard/revenue", icon: DollarSign },
   { name: "Blog management", href: "/dashboard/blog", icon: AppWindow },
-  { name: "Seller Management", href: "/dashboard/seller-management", icon: User2 },
-  { name: "Seller Profile Request", href: "/dashboard/seller-profile-request", icon: UserCheck },
+  {
+    name: "Seller Management",
+    href: "/dashboard/seller-management",
+    icon: User2,
+  },
+  {
+    name: "Seller Profile Request",
+    href: "/dashboard/seller-profile-request",
+    icon: UserCheck,
+  },
   { name: "Buyer Profile", href: "/dashboard/buyer-profile", icon: Users },
   { name: "Setting", href: "/dashboard/setting", icon: Settings },
 ];
@@ -109,7 +124,7 @@ export function Sidebar() {
                     }
                   }}
                   className={cn(
-                    "flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
+                    "flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-normal transition-all duration-200",
                     pathname.startsWith("/dashboard/categories")
                       ? "bg-btnPrimary text-white"
                       : "text-white hover:bg-btnPrimary/70 hover:text-white"
@@ -166,7 +181,7 @@ export function Sidebar() {
                 )}
               >
                 <item.icon className="h-6 w-6" />
-                <span className="text-base">{item.name}</span>
+                <span className="text-[18px] !font-normal leading-[120%]">{item.name}</span>
               </Link>
             );
           }
@@ -178,13 +193,13 @@ export function Sidebar() {
       {/* Logout */}
       <div
         onClick={() => setIsLogoutModalOpen(true)}
-        className="p-3 cursor-pointer"
+        className="p-3 ml-4 cursor-pointer"
       >
-        <div className="flex items-center justify-start space-y-1 rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition-all duration-200 hover:bg-slate-600/50 hover:text-white">
-          <LogOut className="h-5 w-5" />
-          <span className="font-normal text-base leading-[120%]">
-            Log Out
-          </span>
+        <div className="flex gap-2 items-center justify-start rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition-all duration-200 hover:bg-slate-600/50 hover:text-white">
+          <div>
+            <LogOut className="h-5 w-5" />
+          </div>
+          <div className="font-normal text-base leading-[120%]">Log Out</div>
         </div>
       </div>
       <LogoutModal

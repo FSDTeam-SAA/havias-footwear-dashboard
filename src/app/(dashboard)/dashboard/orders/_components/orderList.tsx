@@ -64,13 +64,13 @@ const OrderList = () => {
           <Table className="w-full ">
             <TableHeader className="">
               <TableRow className="">
-                <TableHead className=" py-4 font-bold text-[20px] text-[#1C2228] text-sm uppercase tracking-wide w-60">
+                <TableHead className="py-4 text-[18px] font-semibold uppercase tracking-wide w-60">
                   Product
                 </TableHead>
-                <TableHead className=" py-4 font-bold text-[20px] text-[#1C2228] text-sm uppercase tracking-wide w-32">
+                <TableHead className="py-4 text-[18px] font-semibold uppercase tracking-wide w-32">
                   Price
                 </TableHead>
-                <TableHead className=" py-4 font-bold text-[20px] text-[#1C2228] text-sm uppercase tracking-wide w-40">
+                <TableHead className="py-4 text-[18px] font-semibold uppercase tracking-wide w-40">
                   Delivery Date
                 </TableHead>
               </TableRow>
@@ -96,15 +96,6 @@ const OrderList = () => {
                   order.items.map((item) => (
                     <TableRow key={item._id}>
                       <TableCell className="py-4  flex gap-3 items-center">
-                        {/* <Avatar className="h-12 w-12">
-                          <AvatarImage
-                            src={item.product?.images[0] || ""}
-                            alt={item.product?.title || "N/A"}
-                          />
-                          <AvatarFallback>
-                            {item.product?.title?.charAt(0).toUpperCase() || "N/A"}
-                          </AvatarFallback>
-                        </Avatar> */}
                         <Image src={item.product?.images[0] || ""} alt={item.product?.title || "N/A"} width={80} height={80} className="rounded-lg" />
                         <p className="text-[#595959] text-[16px] font-medium">
                           {item.product?.title?.slice(0, 10) || "N/A"}
@@ -114,11 +105,11 @@ const OrderList = () => {
                         </p>
                       </TableCell>
 
-                      <TableCell className=" text-sm font-medium text-[#1C2228]">
+                      <TableCell className=" text-base font-medium text-[#1C2228]">
                         ${item.unitPrice.toFixed(2)}
                       </TableCell>
 
-                      <TableCell className=" text-sm font-medium text-[#595959]">
+                      <TableCell className=" text-base font-medium text-[#595959]">
                         {new Date(order.createdAt).toLocaleDateString()}
                       </TableCell>
                     </TableRow>
@@ -130,7 +121,7 @@ const OrderList = () => {
 
 
         {/* ✅ Pagination */}
-        {meta && (
+        {meta && meta.total > 10 && (
           <div className="flex  flex-col sm:flex-row sm:items-center sm:justify-between px-6 py-4 bg-gray-50 border-t border-gray-200">
             <div className="mb-2 sm:mb-0">
               <p className="text-sm text-gray-600">

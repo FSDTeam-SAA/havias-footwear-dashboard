@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { Edit, Plus, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Edit, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -97,7 +97,7 @@ const BlogList = () => {
   return (
     <div>
       {/* Header Section */}
-      <div className="border-b border-gray-200 pb-7">
+      <div className="border-b border-gray-200 pb-12">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 mb-1">
@@ -249,7 +249,7 @@ const BlogList = () => {
         </div>
 
         {/* Pagination */}
-        {meta && (
+        {/* {meta && (
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-6 py-4 bg-gray-50 border-t border-gray-200">
             <div className="mb-2 sm:mb-0">
               <p className="text-sm text-gray-600">
@@ -304,7 +304,66 @@ const BlogList = () => {
               </Button>
             </div>
           </div>
-        )}
+        )} */}
+
+
+        {/* Pagination */}
+{meta && meta.total > 10 && (
+  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-6 py-4  border-t border-gray-200">
+    <div className="mb-2 sm:mb-0">
+      <p className="text-sm text-gray-600">
+        Showing{" "}
+        <span className="font-medium">
+          {(meta.page - 1) * meta.limit + 1}
+        </span>{" "}
+        to{" "}
+        <span className="font-medium">
+          {Math.min(meta.page * meta.limit, meta.total)}
+        </span>{" "}
+        of <span className="font-medium">{meta.total}</span> results
+      </p>
+    </div>
+
+    <div className="flex items-center space-x-2">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => setCurrentPage((p) => p - 1)}
+        disabled={meta.page === 1}
+        className="h-9 w-9 p-0 border-gray-300 disabled:opacity-50"
+      >
+        <ChevronLeft/>
+      </Button>
+
+      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+        <Button
+          key={page}
+          size="sm"
+          onClick={() => setCurrentPage(page)}
+          variant={meta.page === page ? "default" : "outline"}
+          className={`h-9 w-9 p-0 ${
+            meta.page === page
+              ? "bg-gray-800 text-white hover:bg-gray-900"
+              : "border-gray-300 hover:bg-gray-50"
+          }`}
+        >
+          {page}
+        </Button>
+      ))}
+
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => setCurrentPage((p) => p + 1)}
+        disabled={meta.page === totalPages}
+        className="h-9 w-9 p-0 border-gray-300 disabled:opacity-50"
+      >
+        <ChevronRight/>
+      </Button>
+    </div>
+  </div>
+)}
+
       </div>
       {/* Delete Confirmation Modal */}
       <ConfirmationModal

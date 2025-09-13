@@ -39,11 +39,11 @@ export const TagsInput: React.FC<TagsInputProps> = ({
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-2 border border-gray-300 rounded-md px-2 py-1">
+    <div className="flex flex-wrap items-center gap-2 border border-gray-300 rounded-md px-2 h-[50px]">
       {value.map((tag, index) => (
         <div
           key={index}
-          className="flex items-center bg-blue-100 text-blue-800 text-sm rounded px-2 py-1"
+          className="flex items-center bg-blue-100 text-blue-800 text-sm rounded px-3 h-[40px]"
         >
           <span>{tag}</span>
           <button

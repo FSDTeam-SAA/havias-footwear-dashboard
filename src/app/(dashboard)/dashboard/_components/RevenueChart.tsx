@@ -2,7 +2,7 @@ export default function RevenueChart() {
     return (
         <div className="bg-white p-4 rounded-lg shadow mt-4">
             <div className="flex justify-between mb-4">
-                <div>Revenue Report</div>
+                <div className="">Revenue Report</div>
                 <select className="border rounded">
                     <option>Day</option>
                     <option>Week</option>

@@ -257,7 +257,7 @@ export default function AddProduct() {
     <div className="min-h-screen">
       <div className="">
         {/* Header */}
-        <div className="pb-5 flex justify-between items-center">
+        <div className="flex justify-between items-center">
           <h1 className="text-2xl font-semibold text-gray-900">Add Products</h1>
           <Button
             size="sm"
@@ -275,7 +275,7 @@ export default function AddProduct() {
           </Button>
         </div>
         {/* Breadcrumb */}
-        <div className="flex items-center text-sm text-gray-500 mb-6">
+        <div className="flex items-center text-sm text-gray-500 mb-10">
           <span>Dashboard</span>
           <ChevronRight className="w-4 h-4 mx-2" />
           <span>Products List</span>
@@ -440,14 +440,15 @@ export default function AddProduct() {
               </Card>
               <br className="my-3" />
               {/* Size Tags Input */}
-              <Card className="">
+              <Card className="!pt-6">
                 <CardContent>
-                  <Label className="text-sm font-medium text-[#595959]">Size</Label>
+                  <Label className="text-sm font-medium pb-2 text-[#595959]">Size</Label>
                   <Controller
                     name="size"
                     control={form.control}
                     render={({ field }) => (
                       <TagsInput
+                    
                         value={field.value ?? []}
                         onValueChange={field.onChange}
                         placeholder="Enter sizes here..."
