@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { Edit, Plus, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Edit, Plus, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -15,11 +15,15 @@ import {
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
-import { ProductResponse, Product } from "../../../../../../types/productDataType";
+import {
+  ProductResponse,
+  Product,
+} from "../../../../../../types/productDataType";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import ConfirmationModal from "@/components/confirmationModal";
+import Title from "../../_components/Title";
 
 const ProductList = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -35,7 +39,9 @@ const ProductList = () => {
     queryKey: ["products", currentPage, searchTerm],
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/product/all-products?searchTerm=${encodeURIComponent(
+        `${
+          process.env.NEXT_PUBLIC_BACKEND_URL
+        }/product/all-products?searchTerm=${encodeURIComponent(
           searchTerm
         )}&page=${currentPage}&limit=${itemsPerPage}`,
         {
@@ -53,6 +59,7 @@ const ProductList = () => {
 
   const products = data?.data ?? [];
   const meta = data?.meta;
+  console.log("meta", meta)
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= (meta?.totalPages ?? 1)) {
@@ -63,12 +70,13 @@ const ProductList = () => {
   const getQuantityDisplay = (quantity: number) => {
     return (
       <span
-        className={`text-sm font-medium ${quantity === 0
-          ? "text-red-600"
-          : quantity < 50
+        className={`text-sm font-medium ${
+          quantity === 0
+            ? "text-red-600"
+            : quantity < 50
             ? "text-orange-600"
             : "text-gray-900"
-          }`}
+        }`}
       >
         {quantity}
       </span>
@@ -111,48 +119,42 @@ const ProductList = () => {
     setDeleteModalOpen(true);
   };
 
-
   const handleDelete = () => {
     if (productToDelete) productDeleteMutation.mutate({ id: productToDelete });
     setProductToDelete(null);
   };
 
-
   return (
     <div>
       {/* Header */}
-      <div className="border-b border-gray-200 pb-7">
+      <div className="border-b border-gray-200 pb-8">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">Products</h1>
-            <div className="flex items-center space-x-2 text-sm">
-              <Link
-                href="/dashboard"
-                className="text-gray-500 text-base hover:text-gray-700 transition-colors"
-              >
-                Dashboard
-              </Link>
-              <span className="text-gray-400">›</span>
-              <span className="text-gray-500 text-base">Products</span>
-            </div>
-          </div>
+          <Title
+            title="Products"
+            active="Dashboard > Product > List"
+          />
 
           <div className="flex items-center space-x-3 w-full sm:w-auto">
-            <Input
-              placeholder="Search products..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="h-[50px] border border-[#0000001A] w-full sm:w-64"
-            />
+            <div className="relative w-full sm:w-64">
+              <Input
+                placeholder="Search products..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="h-[50px] w-full pr-10 border border-[#0000001A]"
+              />
+              <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-gray-400" />
+              </div>
+            </div>
             <Button
               size="sm"
               className="bg-[#797068] hover:bg-[#3a3129] text-white text-base h-[50px] px-6"
             >
               <Link href="/dashboard/product/add" className="flex items-center">
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="!h-5 !w-5 mr-2" />
                 Add product
               </Link>
             </Button>
@@ -161,7 +163,7 @@ const ProductList = () => {
       </div>
 
       {/* Table */}
-      <div className="w-full mt-6">
+      <div className="w-full mt-14">
         {isLoading ? (
           <div className="overflow-x-auto">
             <Table>
@@ -179,7 +181,7 @@ const ProductList = () => {
               </TableHeader>
               <TableBody>
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <TableRow key={i}>
+                  <TableRow key={i} className="">
                     <TableCell>
                       <div className="flex items-center space-x-4">
                         <Skeleton className="w-16 h-16 rounded-lg" />
@@ -226,15 +228,15 @@ const ProductList = () => {
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="border-b border-gray-200">
-                  <TableHead className="w-80">Product Name</TableHead>
-                  <TableHead className="text-center w-24">ID</TableHead>
-                  <TableHead className="text-center w-24">MSRP</TableHead>
-                  <TableHead className="text-center w-20">MOQ</TableHead>
-                  <TableHead className="text-center w-24">Unit Price</TableHead>
-                  <TableHead className="text-center w-20">Quantity</TableHead>
-                  <TableHead className="text-center w-40">Date Added</TableHead>
-                  <TableHead className="text-center w-28">Actions</TableHead>
+                <TableRow className="border-b border-gray-300">
+                  <TableHead className="ffont-medium text-[18px] text-[#1C2228] uppercase tracking-wide w-80">Product Name</TableHead>
+                  <TableHead className="font-medium text-[18px] text-[#1C2228] uppercase tracking-wide text-center w-24">ID</TableHead>
+                  <TableHead className="font-medium text-[18px] text-[#1C2228] uppercase tracking-wide text-center w-24">MSRP</TableHead>
+                  <TableHead className="font-medium text-[18px] text-[#1C2228] uppercase tracking-wide text-center w-20">MOQ</TableHead>
+                  <TableHead className="font-medium text-[18px] text-[#1C2228] uppercase tracking-wide text-center w-24">Unit Price</TableHead>
+                  <TableHead className="font-medium text-[18px] text-[#1C2228] uppercase tracking-wide text-center w-20">Quantity</TableHead>
+                  <TableHead className="font-medium text-[18px] text-[#1C2228] uppercase tracking-wide text-center w-40">Date Added</TableHead>
+                  <TableHead className="font-medium text-[18px] text-[#1C2228] uppercase tracking-wide text-center w-28">Actions</TableHead>
                 </TableRow>
               </TableHeader>
 
@@ -251,29 +253,29 @@ const ProductList = () => {
                           className="rounded-lg w-16 h-16 object-cover border border-gray-200"
                         />
                         <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-gray-900 text-sm mb-1 truncate">
+                          <p className="font-normal text-base mb-1 truncate">
                             {product.title}
                           </p>
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="text-center px-4 py-4">
+                    <TableCell className="text-base text-center px-4 py-4">
                       #{product._id.slice(-6)}
                     </TableCell>
-                    <TableCell className="text-center px-4 py-4">
+                    <TableCell className="text-base text-center px-4 py-4">
                       ${product.msrp}
                     </TableCell>
-                    <TableCell className="text-center px-4 py-4">
+                    <TableCell className="text-base text-center px-4 py-4">
                       {product.moq}
                     </TableCell>
-                    <TableCell className="text-center px-4 py-4">
+                    <TableCell className="text-base text-center px-4 py-4">
                       ${product.unitPrice}
                     </TableCell>
-                    <TableCell className="text-center px-4 py-4">
+                    <TableCell className="text-center text-base px-4 py-4">
                       {getQuantityDisplay(product.quantity)}
                     </TableCell>
                     <TableCell className="text-center px-4 py-4">
-                      <div className="text-xs">
+                      <div className="">
                         <div className="text-base font-normal text-[#424242] px-2 py-1">
                           {new Date(product.createdAt).toLocaleDateString()}
                         </div>
@@ -311,7 +313,7 @@ const ProductList = () => {
         )}
 
         {/* Pagination */}
-        {meta && !isLoading && (
+        {meta && !isLoading && meta.total > itemsPerPage && (
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-6 py-4 border-t border-gray-200">
             <div className="mb-2 sm:mb-0">
               <p className="text-sm text-gray-600">
@@ -334,7 +336,7 @@ const ProductList = () => {
                 disabled={currentPage === 1}
                 className="h-9 w-9 p-0 border-gray-300 disabled:opacity-50"
               >
-                ‹
+                <ChevronLeft />
               </Button>
               {Array.from({ length: meta.totalPages }, (_, i) => i + 1).map(
                 (page) => (
@@ -343,10 +345,11 @@ const ProductList = () => {
                     size="sm"
                     onClick={() => handlePageChange(page)}
                     variant={currentPage === page ? "default" : "outline"}
-                    className={`h-9 w-9 p-0 ${currentPage === page
-                      ? "bg-gray-800 text-white hover:bg-gray-900"
-                      : "border-gray-300 hover:bg-gray-50"
-                      }`}
+                    className={`h-9 w-9 p-0 ${
+                      currentPage === page
+                        ? "bg-gray-800 text-white hover:bg-gray-900"
+                        : "border-gray-300 hover:bg-gray-50"
+                    }`}
                   >
                     {page}
                   </Button>
@@ -359,7 +362,7 @@ const ProductList = () => {
                 disabled={currentPage === meta.totalPages}
                 className="h-9 w-9 p-0 border-gray-300 disabled:opacity-50"
               >
-                ›
+                <ChevronRight />
               </Button>
             </div>
           </div>

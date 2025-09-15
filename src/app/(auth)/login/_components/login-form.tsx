@@ -14,7 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -44,31 +44,6 @@ const LoginForm = () => {
     },
   });
 
-  // 2. Define a submit handler.
-  // async function onSubmit(values: z.infer<typeof formSchema>) {
-  //   try {
-  //     setIsLoading(true);
-
-  //     const res = await signIn("credentials", {
-  //       email: values?.email,
-  //       password: values?.password,
-  //       redirect: false,
-  //     });
-
-  //     if (res?.error) {
-  //       throw new Error(res.error);
-  //     }
-
-  //     toast.success("Login successful!");
-  //     router.push("/");
-  //   } catch (error) {
-  //     console.error("Login failed:", error);
-  //     toast.error((error as Error).message);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // }
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true);
@@ -94,14 +69,15 @@ const LoginForm = () => {
     }
   }
 
-
   return (
     <div>
-      <div className="w-full md:w-[547px] p-3 md:p-7 lg:p-8 rounded-[16px] bg-white">
-        <h3 className="text-2xl md:text-[28px] lg:text-[32px] font-extrabold text-[#1F2937] text-center leading-[120%] ">
+      <div className="w-full md:w-[547px] p-3 md:p-7 lg:p-8 rounded-[16px]">
+        <h3 className="text-2xl md:text-[28px] lg:text-[40px] font-semibold text-[#1F2937] text-center leading-[120%] ">
           Welcome Back
         </h3>
-        <p className="text-base font-normal text-[#787878] leading-[120%] pt-4 text-center">Enter to get unlimited data & information</p>
+        <p className="text-2xl font-normal text-[#595959] leading-[120%] pt-2 mb-6 text-center">
+          Join us and start shopping today
+        </p>
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
@@ -131,7 +107,7 @@ const LoginForm = () => {
                   </FormLabel>
                   <FormControl>
                     <Input
-                      className="w-full h-[48px] text-base font-medium leading-[120%] text-[#293440] rounded-[8px] p-4 border border-[#6C6C6C] placeholder:text-[#787878]"
+                      className="w-full h-[48px] text-base font-normal leading-[120%] text-[#293440] rounded-[8px] p-4 border border-[#6C6C6C] placeholder:text-[#787878]"
                       placeholder="Enter your email ...."
                       {...field}
                     />
@@ -166,11 +142,14 @@ const LoginForm = () => {
                     <div className="relative">
                       <Input
                         type={showPassword ? "text" : "password"}
-                        className="w-full h-[48px] text-base font-medium leading-[120%] text-[#293440] rounded-[8px] p-4 border border-[#6C6C6C] placeholder:text-[#787878]"
+                        className="w-full h-[48px] text-base font-normal leading-[120%] text-[#293440] rounded-[8px] p-4 border border-[#6C6C6C] placeholder:text-[#787878]"
                         placeholder="Enter Password ...."
                         {...field}
                       />
-                      <button type="button" className="absolute top-3.5 right-4">
+                      <button
+                        type="button"
+                        className="absolute top-3 right-3.5"
+                      >
                         {showPassword ? (
                           <Eye onClick={() => setShowPassword(!showPassword)} />
                         ) : (
@@ -208,33 +187,24 @@ const LoginForm = () => {
                     </Label>
                     <FormMessage className="text-red-500" />
                   </FormItem>
-                  {/* <Link
-                    className="text-sm font-medium text-[#293440] leading-[120%] hover:underline"
-                    href="/forgot-password"
-                  >
-                    Forgot Password?
-                  </Link> */}
                 </div>
               )}
             />
 
             <Button
-              disabled={isLoading}
-              className="text-base font-medium text-[#F8FAF9] leading-[120%] rounded-[8px] w-full h-[48px] bg-btnPrimary hover:bg-btnPrimary/80"
+              disabled={isLoading || !form.watch("rememberMe")}
+              className="flex items-center justify-center gap-2 text-base font-medium text-[#F8FAF9] leading-[120%] rounded-[8px] w-full h-[48px] bg-btnPrimary hover:bg-btnPrimary/80"
               type="submit"
             >
-              {isLoading ? "Sign In ..." : "Sign In"}
+              {isLoading ? (
+                <>
+                  Signing In
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                </>
+              ) : (
+                "Sign In"
+              )}
             </Button>
-
-            {/* <p className="text-sm font-medium leading-[120%] text-[#293440] text-center ">
-              Don’t have an account?
-              <Link
-                href="/sign-up"
-                className="text-[#293440] pl-1 hover:underline"
-              >
-                Register Here Now
-              </Link>{" "}
-            </p> */}
           </form>
         </Form>
       </div>

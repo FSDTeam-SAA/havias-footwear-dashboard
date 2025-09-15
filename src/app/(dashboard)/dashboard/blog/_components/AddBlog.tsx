@@ -1,12 +1,10 @@
-
-
 "use client";
 
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChevronRight, X, ImageDown, Loader2 } from "lucide-react";
+import { X, ImageDown, Loader2, Save } from "lucide-react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { Label } from "@/components/ui/label";
@@ -25,6 +23,7 @@ import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Title from "../../_components/Title";
 
 export default function AddBlog() {
   const [title, setTitle] = useState<string>("");
@@ -33,7 +32,7 @@ export default function AddBlog() {
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const descriptionImageInputRef = useRef<HTMLInputElement | null>(null);
-  const router = useRouter()
+  const router = useRouter();
   const session = useSession();
   const token = (session?.data?.user as { accessToken: string })?.accessToken;
   const queryClient = useQueryClient();
@@ -82,7 +81,9 @@ export default function AddBlog() {
   //   input.click();
   // };
 
-  const handleDescriptionImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDescriptionImageSelect = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const files = e.target.files;
     if (!files) return;
 
@@ -109,7 +110,11 @@ export default function AddBlog() {
               (quill as any).children[0].focus();
               setTimeout(() => {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                (window as any).Quill?.find(quill)?.insertEmbed(range.index, "image", imageUrl);
+                (window as any).Quill?.find(quill)?.insertEmbed(
+                  range.index,
+                  "image",
+                  imageUrl
+                );
               }, 0);
             }
           }
@@ -141,7 +146,8 @@ export default function AddBlog() {
   // Blog submission
   const addBlogMutation = useMutation({
     mutationFn: async () => {
-      if (!title || !description || !thumbnail) throw new Error("All fields are required");
+      if (!title || !description || !thumbnail)
+        throw new Error("All fields are required");
 
       const formData = new FormData();
       formData.append("title", title);
@@ -168,7 +174,9 @@ export default function AddBlog() {
       handleRemoveImage();
     },
     onError: (error) => {
-      toast.error(error instanceof Error ? error.message : "Failed to add blog");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to add blog"
+      );
     },
   });
 
@@ -181,25 +189,20 @@ export default function AddBlog() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900 mb-2">
-            Blog Management
-          </h1>
-          <nav className="flex items-center space-x-2 text-sm text-gray-500">
-            <span>Dashboard</span>
-            <ChevronRight size={16} />
-            <span>Blog management</span>
-            <ChevronRight size={16} />
-            <span className="text-gray-900">Add blog</span>
-          </nav>
-        </div>
+      <div className="mb-8 flex items-center justify-between border-b border-gray-200 pb-8">
+        <Title
+          title="Blog Management"
+          active="Dashboard > Blog Management > Add"
+        />
         <Button
           onClick={handleSave}
+          className="mt-4 bg-btnPrimary hover:bg-btnPrimary/60 !h-[50px] text-base"
           disabled={addBlogMutation.isPending}
-          className="bg-gray-700 text-base h-[50px] hover:bg-gray-800 text-white px-6"
         >
-          Add Blog {addBlogMutation.isPending && <Loader2 className="animate-spin" />}
+          <Save className="!w-[20px] !h-[20px]" /> Save
+          {addBlogMutation.isPending && (
+            <Loader2 className="animate-spin ml-2" />
+          )}
         </Button>
       </div>
 
