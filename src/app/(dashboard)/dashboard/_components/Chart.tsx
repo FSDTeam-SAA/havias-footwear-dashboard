@@ -83,7 +83,7 @@ export function RevenueReport() {
     <Card className="shadow bg-white rounded-lg p-3">
       <CardHeader className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
         <div>
-          <CardTitle className="mb-4">Revenue Report</CardTitle>
+          <CardTitle className="mb-4 text-3xl">Revenue Report</CardTitle>
         </div>
         <div className="mt-2 sm:mt-0 flex gap-2 bg-[#E6E6E6] py-2 px-3 rounded-lg">
           {["Day", "Week", "Month", "Year"].map((p) => (

@@ -87,21 +87,23 @@ export default function AddSubCategories() {
     };
 
     return (
-        <div className="container mx-auto p-6">
-            <Title title="Add Subcategories" active="Dashboard > Categories > Add Subcategories" />
+        <div className="">
+            <div className="border-b border-e-gray-300 pb-7">
+                <Title title="Add Subcategories" active="Dashboard > Categories > Add Subcategories" />
+            </div>
             <Card className="mt-10 shadow-none bg-transparent border-none">
                 <CardContent>
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
                         {/* Category Dropdown using ShadCN Select */}
-                        <p className="text-[#272727] font-semibold text-[20px] mb-2">General Information</p>
+                        {/* <p className="text-[#272727] font-semibold text-[20px] mb-2">General Information</p> */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-[#595959]">Select Category</label>
+                            <label className="text-[18px] font-medium text-[#595959]">Select Category</label>
                             <Controller
                                 name="categoryId"
                                 control={control}
                                 render={({ field }) => (
                                     <Select value={field.value} onValueChange={field.onChange}>
-                                        <SelectTrigger className="w-full">
+                                        <SelectTrigger className="w-full !h-[50px] text-[18px] border border-gray-300">
                                             <SelectValue placeholder="Select a category" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -119,7 +121,7 @@ export default function AddSubCategories() {
 
                         {/* Tags Input */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-[#595959]">Sub-Category Name</label>
+                            <label className="text-[18px] font-medium text-[#595959]">Sub-Category Name</label>
                             <Controller
                                 name="tags"
                                 control={control}
@@ -134,10 +136,10 @@ export default function AddSubCategories() {
                         <div className="w-full flex justify-end">
                             <Button
                                 type="submit"
-                                className="mt-4 bg-btnPrimary hover:bg-btnPrimary/60"
+                                className="mt-4 bg-btnPrimary hover:bg-btnPrimary/60 !h-[50px] text-base w-[100px]"
                                 disabled={addSubCategoryMutation.isPending}
                             >
-                                <Save /> Save {addSubCategoryMutation.isPending && <Loader2 className="animate-spin ml-2" />}
+                                <Save className="!w-[20px] !h-[20px]"/> Save {addSubCategoryMutation.isPending && <Loader2 className="animate-spin ml-2" />}
                             </Button>
                         </div>
                     </form>

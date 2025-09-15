@@ -428,12 +428,12 @@ export default function ProfilePage() {
     };
 
     return (
-        <div className="p-6 mx-auto rounded-md min-h-screen">
+        <div className="mx-auto rounded-md min-h-screen">
             {/* Header */}
             <div className="pb-7 mb-6">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-[#595959] mb-1">Setting</h1>
+                        <h1 className="text-3xl font-bold text-[#272727] mb-1">Setting</h1>
                         <div className="flex items-center space-x-2 text-sm">
                             <Link
                                 href="/dashboard"
@@ -499,7 +499,7 @@ export default function ProfilePage() {
                         <Button
                             variant="outline"
                             onClick={() => setIsEditing(true)}
-                            className="px-4 py-2 bg-btnPrimary hover:bg-btnPrimary/80 hover:text-white text-white"
+                            className="px-4 !h-[50px] bg-btnPrimary hover:bg-btnPrimary/80 hover:text-white text-white"
                         >
                             <PencilIcon /> Update Profile
                         </Button>
@@ -507,7 +507,7 @@ export default function ProfilePage() {
                     {isEditing && (
                         <Button
                             onClick={handleSave}
-                            className="px-4 py-2 bg-btnPrimary hover:bg-btnPrimary/80 hover:text-white text-white"
+                            className="px-5 h-[50px] text-lg bg-btnPrimary hover:bg-btnPrimary/80 hover:text-white text-white"
                         >
                             <Save /> Save
                         </Button>
@@ -524,7 +524,7 @@ export default function ProfilePage() {
                         value={formData.fullName}
                         disabled={!isEditing}
                         onChange={handleChange}
-                        className="w-full py-5 px-4 border border-[#0000001A]"
+                        className="w-full h-[50px] px-4 border border-[#0000001A] text-base"
                     />
                 </div>
 
@@ -535,7 +535,7 @@ export default function ProfilePage() {
                         name="email"
                         value={formData.email}
                         disabled
-                        className="w-full py-5 px-4 border border-[#0000001A] bg-gray-100"
+                        className="w-full h-[50px] px-4 border border-[#0000001A] bg-gray-100"
                     />
                 </div>
 
@@ -546,7 +546,7 @@ export default function ProfilePage() {
                         value={formData.phone}
                         disabled={!isEditing}
                         onChange={handleChange}
-                        className="w-full py-5 px-4 border border-[#0000001A]"
+                        className="w-full h-[50px] px-4 border border-[#0000001A]"
                     />
                 </div>
 
@@ -579,7 +579,7 @@ export default function ProfilePage() {
                         value={formData.address}
                         disabled={!isEditing}
                         onChange={handleChange}
-                        className="w-full py-5 px-4 border border-[#0000001A]"
+                        className="w-full h-[50px] px-4 border border-[#0000001A]"
                     />
                 </div>
             </div>

@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChevronRight, X, ImageDown, Save, Loader2 } from "lucide-react";
+import { X, ImageDown, Save, Loader2 } from "lucide-react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { Label } from "@/components/ui/label";
@@ -21,6 +21,7 @@ const ReactQuill = dynamic(() => import("react-quill"), {
 });
 import "react-quill/dist/quill.snow.css";
 import { useRouter } from "next/navigation";
+import Title from "../../_components/Title";
 
 interface BlogData {
   _id: string;
@@ -156,22 +157,16 @@ export default function EditBlog({ id }: { id: string }) {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900 mb-2">
-            Blog Management
-          </h1>
-          <nav className="flex items-center space-x-2 text-sm text-gray-500">
-            <span>Dashboard</span>
-            <ChevronRight size={16} />
-            <span>Blog management</span>
-            <ChevronRight size={16} />
-            <span className="text-gray-900">Edit blog</span>
-          </nav>
-        </div>
+      <div className="mb-8 flex items-center justify-between border-b border-gray-200 pb-8">
+        <Title
+          title="Blog Management"
+          active="Dashboard > Blog Management > Edit"
+        />
+
+
         <Button
           onClick={() => updateBlogMutation.mutate()}
-          className="bg-gray-700 text-base h-[50px] hover:bg-gray-800 text-white px-6"
+          className="text-base h-[50px] bg-btnPrimary hover:bg-btnPrimary/80 text-white px-6"
         >
           <Save size={20} className="" />
           Save Blog {updateBlogMutation.isPending && <Loader2 className="animate-spin mr-2" />}
