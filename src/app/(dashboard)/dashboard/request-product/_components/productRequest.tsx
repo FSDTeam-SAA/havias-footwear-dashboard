@@ -16,7 +16,6 @@ import Image from "next/image";
 import { useState } from "react";
 import { ProductResponse } from "../../../../../../types/productDataType";
 import { toast } from "sonner";
-import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
@@ -26,6 +25,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import Title from "../../_components/Title";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export function ProductTable() {
   const { data: session } = useSession();
@@ -33,7 +34,7 @@ export function ProductTable() {
   const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const { data, isLoading } = useQuery<ProductResponse>({
     queryKey: ["requestsProduct", currentPage, statusFilter],
@@ -105,30 +106,20 @@ export function ProductTable() {
   return (
     <div className="w-full rounded-lg overflow-hidden">
       <div className="flex justify-between items-center pr-3 mb-10">
-        <div className="">
-          <h1 className="text-2xl font-bold text-gray-900 mb-1">
-            Request Product
-          </h1>
-          <div className="flex items-center space-x-2 text-sm">
-            <Link
-              href="/dashboard"
-              className="text-gray-500 text-base hover:text-gray-700 transition-colors"
-            >
-              Dashboard
-            </Link>
-            <span className="text-gray-400">›</span>
-            <span className="text-gray-500 text-base">Request Product</span>
-          </div>
-        </div>
+         <Title
+            title="Request Product"
+            active="Dashboard > Request Product > List"
+          />
+        
         <div>
-          <Select onValueChange={handleFilterChange}>
+          <Select onValueChange={handleFilterChange} defaultValue="all">
             <SelectTrigger className="w-[180px] !h-[45px] text-[18px]">
               <SelectValue placeholder="Select a status" />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="approved">Approve</SelectItem>
+                <SelectItem value="all">All Products</SelectItem>
+                <SelectItem value="approved">Approved</SelectItem>
                 <SelectItem value="rejected">Rejected</SelectItem>
               </SelectGroup>
             </SelectContent>
@@ -138,7 +129,7 @@ export function ProductTable() {
 
       <Table>
         <TableHeader className="">
-          <TableRow className="border-b-2 border-t-2">
+          <TableRow className="border-b border-t">
             <TableHead className="text-[18px] font-medium text-[#131313]">
               Product Name
             </TableHead>
@@ -257,12 +248,12 @@ export function ProductTable() {
                       ${product.unitPrice}
                     </span>
                   </TableCell>
-                  <TableCell>
-                    <span className="text-gray-700 text-base font-normal">
+                  <TableCell className="pl-12">
+                    <span className="text-gray-700  text-base font-normal">
                       ${product.discountPrice}
                     </span>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="pl-6">
                     <span className="text-gray-700 text-base font-normal">
                       {product.quantity}
                     </span>
@@ -332,7 +323,7 @@ export function ProductTable() {
               disabled={currentPage === 1}
               className="h-9 w-9 p-0 border-gray-300 disabled:opacity-50"
             >
-              ‹
+              <ChevronLeft />
             </Button>
             {Array.from({ length: meta.totalPages }, (_, i) => i + 1).map(
               (page) => (
@@ -353,7 +344,7 @@ export function ProductTable() {
               disabled={currentPage === meta.totalPages}
               className="h-9 w-9 p-0 border-gray-300 disabled:opacity-50"
             >
-              ›
+              <ChevronRight />
             </Button>
           </div>
         </div>

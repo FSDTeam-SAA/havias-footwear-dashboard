@@ -10,11 +10,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { SellerRevenueResponse } from "../../../../../../types/sellerRevenueType";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Title from "../../_components/Title";
 
 const RevenueList = () => {
   const itemsPerPage = 7;
@@ -53,24 +53,11 @@ const RevenueList = () => {
   return (
     <div className="space-y-6">
       {/* Header Section */}
-      <div className="border-b border-gray-200 pb-7 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold text-gray-900">
-            Revenue from Sellers
-          </h1>
-          <div className="flex items-center space-x-2 text-sm">
-            <Link
-              href="/dashboard"
-              className="text-gray-500 text-base hover:text-gray-700 transition-colors"
-            >
-              Dashboard
-            </Link>
-            <span className="text-gray-400">›</span>
-            <span className="text-gray-500 text-base">
-              Revenue from Sellers
-            </span>
-          </div>
-        </div>
+      <div className="pb-7 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <Title
+            title="Revenue from Sellers"
+            active="Dashboard > Revenue from Sellers > List"
+          />
       </div>
 
       {/* Table Section */}
@@ -78,10 +65,10 @@ const RevenueList = () => {
         <Table className="w-full border-collapse">
           <TableHeader>
             <TableRow className="border-b border-gray-200">
-              <TableHead className="py-4 font-semibold text-[18px] uppercase leading-[120%] text-center">
+              <TableHead className="py-4 font-medium text-[18px] text-[#1C2228] uppercase tracking-wide text-center">
                 Seller ID
               </TableHead>
-              <TableHead className="py-4 font-semibold text-[18px] uppercase leading-[120%] text-center">
+              <TableHead className="py-4 font-medium text-[18px] text-[#1C2228] uppercase tracking-wide text-center">
                 Total Revenue
               </TableHead>
             </TableRow>

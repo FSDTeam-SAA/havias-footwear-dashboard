@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { ColorsResponse, Color } from "../../../../../../types/colorDataTypes";
 import Link from "next/link";
 import { toast } from "sonner";
+import Title from "../../_components/Title";
 
 const ColorList = () => {
   const session = useSession();
@@ -78,25 +79,12 @@ const ColorList = () => {
 
   return (
     <div className="">
-      <div className="border-b border-gray-200 pb-7">
+      <div className="border-b border-gray-200 pb-12">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">
-              Colors List
-            </h1>
-            <div className="flex items-center space-x-2 text-sm">
-              <Link
-                href="/dashboard"
-                className="text-gray-500 text-base hover:text-gray-700 transition-colors"
-              >
-                Dashboard
-              </Link>
-              <span className="text-gray-400">›</span>
-              <span className="text-gray-500 text-base">Colors</span>
-              <span className="text-gray-400">›</span>
-              <span className="text-gray-500 text-base">List</span>
-            </div>
-          </div>
+           <Title
+            title="Colors List"
+            active="Dashboard > Colors List > List"
+          />
 
           <Button
             size="sm"
@@ -116,10 +104,10 @@ const ColorList = () => {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="text-[18px] font-medium">Name</TableHead>
-            <TableHead className="text-[18px] font-medium">Code</TableHead>
-            <TableHead className="text-[18px] font-medium">Date</TableHead>
-            <TableHead className="text-right text-[18px] font-medium">
+            <TableHead className="text-[18px] font-medium text-[#131313] pl-10">Name</TableHead>
+            <TableHead className="text-[18px] font-medium text-[#131313]">Code</TableHead>
+            <TableHead className="text-[18px] font-medium text-[#131313]">Date</TableHead>
+            <TableHead className="text-right text-[18px] font-medium text-[#131313] pr-12">
               Actions
             </TableHead>
           </TableRow>
@@ -127,7 +115,7 @@ const ColorList = () => {
         <TableBody>
           {colors.map((color) => (
             <TableRow key={color._id} className="items-center">
-              <TableCell className="py-6">{color.name}</TableCell>
+              <TableCell className="py-6 pl-10 text-base">{color.name}</TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">
                   <div
@@ -137,10 +125,10 @@ const ColorList = () => {
                   <span>{color.code}</span>
                 </div>
               </TableCell>
-              <TableCell>
+              <TableCell className="text-base">
                 {new Date(color.createdAt).toLocaleDateString()}
               </TableCell>
-              <TableCell className="flex flex-col items-end justify-center gap-3 h-[70px]">
+              <TableCell className="flex flex-col items-end justify-center gap-3 h-[70px] pr-12">
                 <div className="space-x-5">
                   <button>
                     <Link

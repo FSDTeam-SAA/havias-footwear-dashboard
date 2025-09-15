@@ -748,7 +748,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -759,7 +758,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChevronRight, Upload, ImageIcon, Loader2 } from "lucide-react";
+import { Upload, ImageIcon, Loader2 } from "lucide-react";
 import Image from "next/image";
 import "react-quill/dist/quill.snow.css";
 import { TagsInput } from "@/components/ui/tagsInput";
@@ -767,6 +766,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { ColorsResponse } from "../../../../../../types/colorDataTypes";
+import Title from "../../_components/Title";
 
 // React Quill Setup
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
@@ -1103,28 +1103,11 @@ export default function EditProduct({ id }: { id: string }) {
   return (
     <div className="min-h-screen">
       <div className="">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-semibold text-gray-900">Edit Product</h1>
-          <Button
-            size="sm"
-            className="bg-[#797068] hover:bg-[#3a3129] text-white text-base h-[50px] px-6"
-            type="submit"
-            form="product-form"
-            disabled={updateProductMutation.isPending}
-          >
-            <div className="flex items-center">
-              Update Product {updateProductMutation.isPending && <Loader2 className="animate-spin ml-2" />}
-            </div>
-          </Button>
-        </div>
-        {/* Breadcrumb */}
-        <div className="flex items-center text-sm text-gray-500 mb-14">
-          <span>Dashboard</span>
-          <ChevronRight className="w-4 h-4 mx-2" />
-          <span>Products List</span>
-          <ChevronRight className="w-4 h-4 mx-2" />
-          <span className="text-gray-900">Edit Product</span>
+        <div className="mb-12">
+          <Title
+            title="Edit Product"
+            active="Dashboard > Edit Product > Edit"
+          />
         </div>
 
         <Form {...form}>
@@ -1339,7 +1322,7 @@ export default function EditProduct({ id }: { id: string }) {
             </div>
 
             {/* Right Column */}
-            <div className="space-y-4">
+            <div className="space-y-7">
               {/* Category */}
               <Card>
                 <CardContent>

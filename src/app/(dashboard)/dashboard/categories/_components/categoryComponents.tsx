@@ -51,8 +51,6 @@ const CategoryList = () => {
   const categories = data?.data ?? [];
   const totalPages = data?.meta?.totalPages ?? 1;
   const totalResults = data?.meta?.total ?? 0;
-  console.log(totalResults);
-  console.log("totalpage", totalPages);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -110,7 +108,7 @@ const CategoryList = () => {
   return (
     <div className="">
       {/* Header */}
-      <div className="">
+      <div className="border-b border-gray-200 pb-7">
         <div className="flex justify-between w-full">
           <Title
             title="Categories List"
@@ -130,7 +128,7 @@ const CategoryList = () => {
 
       {/* Table */}
       <div className="w-full overflow-x-auto mt-8">
-        <Table className="w-full border-b border-[#B6B6B6]">
+        <Table className="w-full border-b border-gray-200">
           <TableHeader>
             <TableRow className="border-b border-[#B6B6B6]">
               <TableHead className="text-left font-medium text-[18px] text-[#1C2228] uppercase tracking-wide w-80">
@@ -149,7 +147,7 @@ const CategoryList = () => {
             {categories.map((category: Category, index) => (
               <TableRow
                 key={category._id}
-                className={`border-b border-[#B6B6B6] ${
+                className={`border-b border-gray-300 ${
                   index === categories.length - 1 ? "border-b-0" : ""
                 }`}
               >
@@ -194,8 +192,8 @@ const CategoryList = () => {
       </div>
 
       {/* Pagination */}
-      {totalResults > itemsPerPage && (
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-6 py-4 bg-white border-t border-gray-200">
+      {totalResults > 10 && (
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-6 py-4">
           <div className="mb-2 sm:mb-0">
             <p className="text-sm text-gray-600">
               Showing{" "}

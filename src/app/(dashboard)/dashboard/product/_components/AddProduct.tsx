@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChevronRight, Upload, ImageIcon, Loader2, X } from "lucide-react"; // Added X icon
+import { Upload, ImageIcon, X } from "lucide-react"; // Added X icon
 import Image from "next/image";
 import "react-quill/dist/quill.snow.css";
 import { TagsInput } from "@/components/ui/tagsInput";
@@ -33,6 +33,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { ColorsResponse } from "../../../../../../types/colorDataTypes";
+import Title from "../../_components/Title";
 
 // React Quill Setup
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
@@ -256,31 +257,11 @@ export default function AddProduct() {
   return (
     <div className="min-h-screen">
       <div className="">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-semibold text-gray-900">Add Products</h1>
-          <Button
-            size="sm"
-            className="bg-[#797068] hover:bg-[#3a3129] text-white text-base h-[50px] px-6"
-            type="submit"
-            form="product-form"
-            disabled={createProductMutation.isPending}
-          >
-            <span className="flex items-center">
-              {createProductMutation.isPending && (
-                <Loader2 className="animate-spin mr-2" />
-              )}
-              Publish Product
-            </span>
-          </Button>
-        </div>
-        {/* Breadcrumb */}
-        <div className="flex items-center text-sm text-gray-500 mb-10">
-          <span>Dashboard</span>
-          <ChevronRight className="w-4 h-4 mx-2" />
-          <span>Products List</span>
-          <ChevronRight className="w-4 h-4 mx-2" />
-          <span className="text-gray-900">Add Products</span>
+        <div className="mb-12">
+          <Title
+            title="Add Products"
+            active="Dashboard > Add Products > Add"
+          />
         </div>
 
         <Form {...form}>

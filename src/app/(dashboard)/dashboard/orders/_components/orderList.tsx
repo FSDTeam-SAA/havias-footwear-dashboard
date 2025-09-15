@@ -24,6 +24,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { Order, OrderResponse } from "../../../../../../types/orderDataType";
 import Image from "next/image";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const itemsPerPage = 7;
 
@@ -59,18 +60,18 @@ const OrderList = () => {
   return (
     <div>
       {/* ✅ Table */}
-      <div className="w-full mt-6">
+      <div className="w-full mt-10">
         <div className="overflow-x-auto">
           <Table className="w-full ">
             <TableHeader className="">
               <TableRow className="">
-                <TableHead className="py-4 text-[18px] font-semibold uppercase tracking-wide w-60">
+                <TableHead className="py-4 font-medium text-[18px] text-[#1C2228] uppercase tracking-wide w-60">
                   Product
                 </TableHead>
-                <TableHead className="py-4 text-[18px] font-semibold uppercase tracking-wide w-32">
+                <TableHead className="py-4 font-medium text-[18px] text-[#1C2228] uppercase tracking-wide w-32">
                   Price
                 </TableHead>
-                <TableHead className="py-4 text-[18px] font-semibold uppercase tracking-wide w-40">
+                <TableHead className="py-4 font-medium text-[18px] text-[#1C2228] uppercase tracking-wide w-40">
                   Delivery Date
                 </TableHead>
               </TableRow>
@@ -122,7 +123,7 @@ const OrderList = () => {
 
         {/* ✅ Pagination */}
         {meta && meta.total > 10 && (
-          <div className="flex  flex-col sm:flex-row sm:items-center sm:justify-between px-6 py-4 bg-gray-50 border-t border-gray-200">
+          <div className="flex  flex-col sm:flex-row sm:items-center sm:justify-between px-6 py-4 border-t border-gray-200">
             <div className="mb-2 sm:mb-0">
               <p className="text-sm text-gray-600">
                 Showing{" "}
@@ -145,7 +146,7 @@ const OrderList = () => {
                 disabled={meta.page === 1}
                 className="h-9 w-9 p-0 border-gray-300 disabled:opacity-50"
               >
-                ‹
+                <ChevronLeft />
               </Button>
 
               {Array.from({ length: totalPages }, (_, i) => i + 1).map(
@@ -172,7 +173,7 @@ const OrderList = () => {
                 disabled={meta.page === totalPages}
                 className="h-9 w-9 p-0 border-gray-300 disabled:opacity-50"
               >
-                ›
+                <ChevronRight />
               </Button>
             </div>
           </div>

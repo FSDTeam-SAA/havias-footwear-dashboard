@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { Edit, Plus, Search, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Edit, Plus, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import ConfirmationModal from "@/components/confirmationModal";
+import Title from "../../_components/Title";
 
 const ProductList = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -126,21 +127,12 @@ const ProductList = () => {
   return (
     <div>
       {/* Header */}
-      <div className="border-b border-[#B6B6B6] pb-8">
+      <div className="border-b border-gray-200 pb-8">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">Products</h1>
-            <div className="flex items-center space-x-2 text-sm">
-              <Link
-                href="/dashboard"
-                className="text-gray-500 text-base hover:text-gray-700 transition-colors"
-              >
-                Dashboard
-              </Link>
-              <span className="text-gray-400">›</span>
-              <span className="text-gray-500 text-base">Products</span>
-            </div>
-          </div>
+          <Title
+            title="Products"
+            active="Dashboard > Product > List"
+          />
 
           <div className="flex items-center space-x-3 w-full sm:w-auto">
             <div className="relative w-full sm:w-64">
@@ -236,15 +228,15 @@ const ProductList = () => {
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="border-b border-gray-200">
-                  <TableHead className="text-[18px] w-80">Product Name</TableHead>
-                  <TableHead className="text-[18px] text-center w-24">ID</TableHead>
-                  <TableHead className="text-[18px] text-center w-24">MSRP</TableHead>
-                  <TableHead className="text-[18px] text-center w-20">MOQ</TableHead>
-                  <TableHead className="text-[18px] text-center w-24">Unit Price</TableHead>
-                  <TableHead className="text-[18px] text-center w-20">Quantity</TableHead>
-                  <TableHead className="text-[18px] text-center w-40">Date Added</TableHead>
-                  <TableHead className="text-[18px] text-center w-28">Actions</TableHead>
+                <TableRow className="border-b border-gray-300">
+                  <TableHead className="ffont-medium text-[18px] text-[#1C2228] uppercase tracking-wide w-80">Product Name</TableHead>
+                  <TableHead className="font-medium text-[18px] text-[#1C2228] uppercase tracking-wide text-center w-24">ID</TableHead>
+                  <TableHead className="font-medium text-[18px] text-[#1C2228] uppercase tracking-wide text-center w-24">MSRP</TableHead>
+                  <TableHead className="font-medium text-[18px] text-[#1C2228] uppercase tracking-wide text-center w-20">MOQ</TableHead>
+                  <TableHead className="font-medium text-[18px] text-[#1C2228] uppercase tracking-wide text-center w-24">Unit Price</TableHead>
+                  <TableHead className="font-medium text-[18px] text-[#1C2228] uppercase tracking-wide text-center w-20">Quantity</TableHead>
+                  <TableHead className="font-medium text-[18px] text-[#1C2228] uppercase tracking-wide text-center w-40">Date Added</TableHead>
+                  <TableHead className="font-medium text-[18px] text-[#1C2228] uppercase tracking-wide text-center w-28">Actions</TableHead>
                 </TableRow>
               </TableHeader>
 
@@ -344,7 +336,7 @@ const ProductList = () => {
                 disabled={currentPage === 1}
                 className="h-9 w-9 p-0 border-gray-300 disabled:opacity-50"
               >
-                ‹
+                <ChevronLeft />
               </Button>
               {Array.from({ length: meta.totalPages }, (_, i) => i + 1).map(
                 (page) => (
@@ -370,7 +362,7 @@ const ProductList = () => {
                 disabled={currentPage === meta.totalPages}
                 className="h-9 w-9 p-0 border-gray-300 disabled:opacity-50"
               >
-                ›
+                <ChevronRight />
               </Button>
             </div>
           </div>

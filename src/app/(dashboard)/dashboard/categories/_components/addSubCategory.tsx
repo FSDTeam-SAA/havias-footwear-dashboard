@@ -88,7 +88,9 @@ export default function AddSubCategories() {
 
     return (
         <div className="">
-            <Title title="Add Subcategories" active="Dashboard > Categories > Add Subcategories" />
+            <div className="border-b border-e-gray-300 pb-7">
+                <Title title="Add Subcategories" active="Dashboard > Categories > Add Subcategories" />
+            </div>
             <Card className="mt-10 shadow-none bg-transparent border-none">
                 <CardContent>
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
@@ -101,7 +103,7 @@ export default function AddSubCategories() {
                                 control={control}
                                 render={({ field }) => (
                                     <Select value={field.value} onValueChange={field.onChange}>
-                                        <SelectTrigger className="w-full !h-[50px] text-[18px]">
+                                        <SelectTrigger className="w-full !h-[50px] text-[18px] border border-gray-300">
                                             <SelectValue placeholder="Select a category" />
                                         </SelectTrigger>
                                         <SelectContent>

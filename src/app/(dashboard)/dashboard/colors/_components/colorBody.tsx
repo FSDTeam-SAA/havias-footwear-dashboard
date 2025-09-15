@@ -5,7 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 import { Loader2, Save } from "lucide-react";
-import Link from "next/link";
+import Title from "../../_components/Title";
 
 const ColorsBody = () => {
   const { data: session } = useSession();
@@ -51,27 +51,14 @@ const ColorsBody = () => {
     <div className="">
       <div className="border-b border-gray-200 pb-7">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">
-              Add Colors
-            </h1>
-            <div className="flex items-center space-x-2 text-sm">
-              <Link
-                href="/dashboard"
-                className="text-gray-500 text-base hover:text-gray-700 transition-colors"
-              >
-                Dashboard
-              </Link>
-              <span className="text-gray-400">›</span>
-              <span className="text-gray-500 text-base">Colors</span>
-              <span className="text-gray-400">›</span>
-              <span className="text-gray-500 text-base">Add Colors</span>
-            </div>
-          </div>
+          <Title
+            title="Add Colors"
+            active="Dashboard > Add Colors > Add"
+          />
 
           
         </div>
-      </div>
+      </div>Edit Color
 
       <form onSubmit={handleSubmit} className="space-y-6 mt-10">
         {/* Colors Name */}
