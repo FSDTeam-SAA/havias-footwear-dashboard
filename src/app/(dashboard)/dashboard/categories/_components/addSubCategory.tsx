@@ -1,10 +1,10 @@
 "use client";
 
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Title from "../../_components/Title";
-import { Loader2, Save } from "lucide-react";
-import { TagsInput } from "@/components/ui/tagsInput";
+import { Loader2, Save, Plus } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
@@ -14,7 +14,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CategoryResponse } from "../../../../../../types/categoryDataType";
 
-// 1. Zod schema
 const subCategorySchema = z.object({
     categoryId: z.string().min(1, "Category is required"),
     tags: z.array(z.string()).min(1, "At least one tag is required"),
@@ -27,6 +26,8 @@ export default function AddSubCategories() {
     const queryClient = useQueryClient();
     const token = (session?.data?.user as { accessToken: string })?.accessToken;
 
+    const [inputValue, setInputValue] = useState(""); // State for the single input field
+
     const {
         handleSubmit,
         control,
@@ -37,8 +38,7 @@ export default function AddSubCategories() {
         defaultValues: { categoryId: "", tags: [] },
     });
 
-    // Fetch all categories
-    const { data, isLoading } = useQuery<CategoryResponse>({
+    const { data } = useQuery<CategoryResponse>({
         queryKey: ["categories"],
         queryFn: async () => {
             const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/category/all-categories?page=1&limit=50`, {
@@ -50,8 +50,6 @@ export default function AddSubCategories() {
         enabled: !!token,
     });
 
-    console.log(isLoading)
-    // Mutation to create subcategory
     const addSubCategoryMutation = useMutation({
         mutationFn: async (payload: { categoryId: string; name: string[] }) => {
             const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/sub-category`, {
@@ -70,6 +68,7 @@ export default function AddSubCategories() {
             toast.success(data.message || "Subcategory added successfully");
             queryClient.invalidateQueries({ queryKey: ["categories"] });
             reset();
+            setInputValue("");
         },
         onError: (error) => {
             toast.error(error instanceof Error ? error.message : "Failed to add subcategory");
@@ -77,12 +76,10 @@ export default function AddSubCategories() {
     });
 
     const onSubmit = (formData: SubCategoryFormValues) => {
-        console.log("Selected Category ID:", formData.categoryId);
-        console.log("Selected Tags:", formData.tags);
         const payload = {
             categoryId: formData.categoryId,
             name: formData.tags
-        }
+        };
         addSubCategoryMutation.mutate(payload);
     };
 
@@ -94,8 +91,8 @@ export default function AddSubCategories() {
             <Card className="mt-10 shadow-none bg-transparent border-none">
                 <CardContent>
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
-                        {/* Category Dropdown using ShadCN Select */}
-                        {/* <p className="text-[#272727] font-semibold text-[20px] mb-2">General Information</p> */}
+
+                        {/* Category Dropdown */}
                         <div className="space-y-2">
                             <label className="text-[18px] font-medium text-[#595959]">Select Category</label>
                             <Controller
@@ -119,15 +116,74 @@ export default function AddSubCategories() {
                             {errors.categoryId && <p className="text-red-500 text-sm">{errors.categoryId.message}</p>}
                         </div>
 
-                        {/* Tags Input */}
+                        {/* Tags Input with Plus Button */}
                         <div className="space-y-2">
                             <label className="text-[18px] font-medium text-[#595959]">Sub-Category Name</label>
                             <Controller
                                 name="tags"
                                 control={control}
-                                render={({ field }) => (
-                                    <TagsInput value={field.value} onValueChange={field.onChange} placeholder="Enter Sub-Category Name here..." />
-                                )}
+                                render={({ field }) => {
+
+                                    const addTag = () => {
+                                        const trimmed = inputValue.trim();
+                                        if (trimmed && !field.value.includes(trimmed)) {
+                                            field.onChange([...field.value, trimmed]);
+                                            setInputValue("");
+                                        }
+                                    };
+
+                                    const removeTag = (tag: string) => {
+                                        field.onChange(field.value.filter((t: string) => t !== tag));
+                                    };
+
+                                    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+                                        if (e.key === "Enter") {
+                                            e.preventDefault();
+                                            addTag();
+                                        }
+                                    };
+
+                                    return (
+                                        <div className="flex flex-col w-full">
+                                            <div className="flex">
+                                                <input
+                                                    type="text"
+                                                    value={inputValue}
+                                                    onChange={(e) => setInputValue(e.target.value)}
+                                                    onKeyDown={handleKeyDown}
+                                                    placeholder="Enter Sub-Category Name..."
+                                                    className="flex-1 border border-gray-300 bg-transparent rounded-md h-[50px] px-3"
+                                                />
+                                                <Button
+                                                    type="button"
+                                                    onClick={addTag}
+                                                    className="ml-2 h-[50px] w-[50px] flex items-center justify-center"
+                                                >
+                                                    <Plus className="w-5 h-5" />
+                                                </Button>
+                                            </div>
+
+                                            {/* Display added tags */}
+                                            <div className="flex flex-wrap gap-2 mt-2">
+                                                {field.value.map((tag: string, idx: number) => (
+                                                    <div
+                                                        key={idx}
+                                                        className="flex items-center gap-1 bg-gray-200 text-gray-800 px-2 py-1 rounded-full"
+                                                    >
+                                                        <span>{tag}</span>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeTag(tag)}
+                                                            className="text-red-500 hover:text-red-700"
+                                                        >
+                                                            ×
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                }}
                             />
                             {errors.tags && <p className="text-red-500 text-sm">{errors.tags.message}</p>}
                         </div>
