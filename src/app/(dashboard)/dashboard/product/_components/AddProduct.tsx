@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Upload, ImageIcon, X } from "lucide-react"; // Added X icon
+import { Upload, ImageIcon, X, Loader2, Save } from "lucide-react"; // Added X icon
 import Image from "next/image";
 import "react-quill/dist/quill.snow.css";
 import { TagsInput } from "@/components/ui/tagsInput";
@@ -125,7 +125,6 @@ export default function AddProduct() {
     enabled: !!token,
   });
 
-
   const { data: colorsData } = useQuery<ColorsResponse>({
     queryKey: ["color"],
     queryFn: async () => {
@@ -143,7 +142,6 @@ export default function AddProduct() {
     },
     enabled: !!token,
   });
-
 
   useEffect(() => {
     if (!selectedCategory) return;
@@ -177,8 +175,6 @@ export default function AddProduct() {
     fetchSubCategories();
   }, [selectedCategory, token, form]);
 
-
-
   // Image Upload Handler
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
@@ -186,7 +182,7 @@ export default function AddProduct() {
 
     const previewUrls = files.map((file) => URL.createObjectURL(file));
     setUploadedImages((prev) => [...prev, ...previewUrls]);
-    e.target.value = ''; // This resets the file input so the same file can be selected again after being removed
+    e.target.value = ""; // This resets the file input so the same file can be selected again after being removed
   };
 
   // Image Remove Handler
@@ -198,11 +194,14 @@ export default function AddProduct() {
   // Mutation
   const createProductMutation = useMutation({
     mutationFn: async (body: any) => {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/product`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body,
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/product`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body,
+        }
+      );
       if (!res.ok) {
         const err = await res.json();
         throw new Error(err.message || "Failed to create product");
@@ -258,10 +257,7 @@ export default function AddProduct() {
     <div className="min-h-screen">
       <div className="">
         <div className="mb-12">
-          <Title
-            title="Add Products"
-            active="Dashboard > Add Products > Add"
-          />
+          <Title title="Add Products" active="Dashboard > Add Products > Add" />
         </div>
 
         <Form {...form}>
@@ -421,20 +417,24 @@ export default function AddProduct() {
               </Card>
               <br className="my-3" />
               {/* Size Tags Input */}
-              <Card className="!pt-6">
+              <Card className="!pt-10">
                 <CardContent>
-                  <Label className="text-sm font-medium pb-2 text-[#595959]">Size</Label>
+                  <Label className="text-sm font-medium pb-2 text-[#595959]">
+                    Size
+                  </Label>
                   <Controller
                     name="size"
                     control={form.control}
                     render={({ field }) => (
                       <TagsInput
-                    
                         value={field.value ?? []}
                         onValueChange={field.onChange}
                         placeholder="Enter sizes here..."
                       />
                     )}
+
+
+                    
                   />
                   {form.formState.errors.size && (
                     <p className="text-red-500 text-sm">
@@ -445,7 +445,7 @@ export default function AddProduct() {
               </Card>
 
               {/* Color Select */}
-              <Card>
+              <Card className="pt-5">
                 <CardContent>
                   <FormField
                     control={form.control}
@@ -453,7 +453,10 @@ export default function AddProduct() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Color</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
                           <SelectTrigger className="h-[50px] border border-[#B6B6B6]">
                             <SelectValue placeholder="Select a color" />
                           </SelectTrigger>
@@ -493,7 +496,9 @@ export default function AddProduct() {
                         <Select
                           onValueChange={(val) => {
                             field.onChange(val);
-                            const selected = categoriesData?.data.find((c: any) => c._id === val);
+                            const selected = categoriesData?.data.find(
+                              (c: any) => c._id === val
+                            );
                             setSelectedCategory(selected);
                           }}
                           value={field.value}
@@ -525,7 +530,11 @@ export default function AddProduct() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Product Type</FormLabel>
-                        <Select disabled={deactiveProductType} onValueChange={field.onChange} value={field.value}>
+                        <Select
+                          disabled={deactiveProductType}
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
                           <SelectTrigger className="h-[50px] border border-[#B6B6B6]">
                             <SelectValue placeholder="Select Product Type" />
                           </SelectTrigger>
@@ -552,16 +561,21 @@ export default function AddProduct() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Sub-Category</FormLabel>
-                        <Select disabled={deactiveSubCategory} onValueChange={field.onChange} value={field.value}>
+                        <Select
+                          disabled={deactiveSubCategory}
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
                           <SelectTrigger className="h-[50px] border border-[#B6B6B6]">
                             <SelectValue placeholder="Select Sub-Category" />
                           </SelectTrigger>
                           <SelectContent>
-                            {subCategories && subCategories?.map((sc) => (
-                              <SelectItem key={sc._id} value={sc._id}>
-                                {sc.name}
-                              </SelectItem>
-                            ))}
+                            {subCategories &&
+                              subCategories?.map((sc) => (
+                                <SelectItem key={sc._id} value={sc._id}>
+                                  {sc.name}
+                                </SelectItem>
+                              ))}
                           </SelectContent>
                           <FormMessage />
                         </Select>
@@ -648,7 +662,9 @@ export default function AddProduct() {
                         </button>
                       </div>
                     ))}
-                    {Array.from({ length: Math.max(0, 4 - uploadedImages.length) }).map((_, index) => (
+                    {Array.from({
+                      length: Math.max(0, 4 - uploadedImages.length),
+                    }).map((_, index) => (
                       <div
                         key={`empty-${index}`}
                         className="aspect-square border border-gray-300 rounded-lg flex items-center justify-center bg-gray-50"
@@ -657,6 +673,30 @@ export default function AddProduct() {
                       </div>
                     ))}
                   </div>
+                  <div className="lg:col-span-3 flex flex-col gap-2">
+  <Button
+    type="submit"
+    form="product-form"
+    className="mt-4 bg-btnPrimary hover:bg-btnPrimary/60  w-full  !h-[50px] text-base flex items-center justify-center gap-2"
+    disabled={createProductMutation.isPending || !form.getValues("subCategory")}
+  >
+    <Save className="!w-[20px] !h-[20px]" />
+    Save Product
+    {createProductMutation.isPending && (
+      <Loader2 className="animate-spin ml-2" />
+    )}
+  </Button>
+  
+  {/* Message shown when button is disabled */}
+  {(createProductMutation.isPending || !form.getValues("subCategory")) && (
+    <p className="text-red-500 text-sm">
+      { !form.getValues("subCategory") 
+        ? "Please select a subcategory before saving." 
+        : "Saving product..." }
+    </p>
+  )}
+</div>
+
                 </CardContent>
               </Card>
             </div>

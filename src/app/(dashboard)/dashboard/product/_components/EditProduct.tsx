@@ -193,7 +193,6 @@
 //     }
 //   }, [product, categoriesData, form, colorsData]);
 
-
 //   // Fetch subcategories when selectedCategory changes
 //   useEffect(() => {
 //     if (!selectedCategory) return;
@@ -247,7 +246,6 @@
 //     // Remove the image from the preview list
 //     setUploadedImages((prev) => prev.filter((img) => img !== image));
 //   };
-
 
 //   // Mutation
 //   const updateProductMutation = useMutation({
@@ -314,7 +312,6 @@
 //       </div>
 //     );
 //   }
-
 
 //   return (
 //     <div className="min-h-screen">
@@ -614,7 +611,6 @@
 //                           </Select>
 //                         )}
 
-
 //                       </FormItem>
 //                     )}
 //                   />
@@ -727,10 +723,6 @@
 //     </div>
 //   );
 // }
-
-
-
-
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
@@ -845,18 +837,19 @@ export default function EditProduct({ id }: { id: string }) {
   });
 
   // Fetch categories
-  const { data: categoriesData, isLoading: isCategoriesLoading } = useQuery<any>({
-    queryKey: ["categories"],
-    queryFn: async () => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/category/all-categories?page=1&limit=50`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      if (!res.ok) throw new Error("Failed to fetch categories");
-      return res.json();
-    },
-    enabled: !!token,
-  });
+  const { data: categoriesData, isLoading: isCategoriesLoading } =
+    useQuery<any>({
+      queryKey: ["categories"],
+      queryFn: async () => {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/category/all-categories?page=1&limit=50`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (!res.ok) throw new Error("Failed to fetch categories");
+        return res.json();
+      },
+      enabled: !!token,
+    });
 
   // Fetch single product
   const { data: product, isLoading: isProductLoading } = useQuery<any>({
@@ -873,18 +866,19 @@ export default function EditProduct({ id }: { id: string }) {
   });
 
   // Fetch colors
-  const { data: colorsData, isLoading: isColorsLoading } = useQuery<ColorsResponse>({
-    queryKey: ["colors"],
-    queryFn: async () => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/color?page=1&limit=50`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      if (!res.ok) throw new Error("Failed to fetch colors");
-      return res.json();
-    },
-    enabled: !!token,
-  });
+  const { data: colorsData, isLoading: isColorsLoading } =
+    useQuery<ColorsResponse>({
+      queryKey: ["colors"],
+      queryFn: async () => {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/color?page=1&limit=50`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (!res.ok) throw new Error("Failed to fetch colors");
+        return res.json();
+      },
+      enabled: !!token,
+    });
 
   // Set form values and images when product, categories, and colors data are available
   useEffect(() => {
@@ -1038,11 +1032,14 @@ export default function EditProduct({ id }: { id: string }) {
   // Mutation
   const updateProductMutation = useMutation({
     mutationFn: async (body: any) => {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/product/${id}`, {
-        method: "PATCH", // Use PATCH for updates
-        headers: { Authorization: `Bearer ${token}` },
-        body,
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/product/${id}`,
+        {
+          method: "PATCH", // Use PATCH for updates
+          headers: { Authorization: `Bearer ${token}` },
+          body,
+        }
+      );
       if (!res.ok) {
         const err = await res.json();
         throw new Error(err.message || "Failed to update product");
@@ -1262,9 +1259,11 @@ export default function EditProduct({ id }: { id: string }) {
               </Card>
 
               {/* Size Tags Input */}
-              <Card className="pt-[45px]" >
+              <Card className="pt-[45px]">
                 <CardContent>
-                  <Label className="text-sm font-medium  text-[#595959]">Size</Label>
+                  <Label className="text-sm font-medium  text-[#595959]">
+                    Size
+                  </Label>
                   <Controller
                     name="size"
                     control={form.control}
@@ -1293,7 +1292,10 @@ export default function EditProduct({ id }: { id: string }) {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Color</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
                           <SelectTrigger className="h-[50px] border border-[#B6B6B6]">
                             <SelectValue placeholder="Select a color" />
                           </SelectTrigger>
@@ -1308,7 +1310,6 @@ export default function EditProduct({ id }: { id: string }) {
                                   {clr.name}
                                 </div>
                               </SelectItem>
-
                             ))}
                           </SelectContent>
                         </Select>
@@ -1318,7 +1319,6 @@ export default function EditProduct({ id }: { id: string }) {
                   />
                 </CardContent>
               </Card>
-
             </div>
 
             {/* Right Column */}
@@ -1335,7 +1335,9 @@ export default function EditProduct({ id }: { id: string }) {
                         <Select
                           onValueChange={(val) => {
                             field.onChange(val);
-                            const selected = categoriesData?.data.find((c: any) => c._id === val);
+                            const selected = categoriesData?.data.find(
+                              (c: any) => c._id === val
+                            );
                             setSelectedCategory(selected);
                             form.setValue("productType", "");
                             form.setValue("subCategory", "");
@@ -1369,7 +1371,13 @@ export default function EditProduct({ id }: { id: string }) {
                       <FormItem>
                         <FormLabel>Product Type</FormLabel>
                         {productTypes.length > 0 && (
-                          <Select disabled={deactiveProductType || productTypes.length === 0} onValueChange={field.onChange} value={field.value}>
+                          <Select
+                            disabled={
+                              deactiveProductType || productTypes.length === 0
+                            }
+                            onValueChange={field.onChange}
+                            value={field.value}
+                          >
                             <SelectTrigger className="h-[50px] border border-[#B6B6B6]">
                               <SelectValue placeholder="Select Product Type" />
                             </SelectTrigger>
@@ -1382,8 +1390,6 @@ export default function EditProduct({ id }: { id: string }) {
                             </SelectContent>
                           </Select>
                         )}
-
-
                       </FormItem>
                     )}
                   />
@@ -1399,7 +1405,13 @@ export default function EditProduct({ id }: { id: string }) {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Sub-Category</FormLabel>
-                        <Select disabled={deactiveSubCategory || subCategories.length === 0} onValueChange={field.onChange} value={field.value}>
+                        <Select
+                          disabled={
+                            deactiveSubCategory || subCategories.length === 0
+                          }
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
                           <SelectTrigger className="h-[50px] border border-[#B6B6B6]">
                             <SelectValue placeholder="Select Sub-Category" />
                           </SelectTrigger>
@@ -1465,16 +1477,16 @@ export default function EditProduct({ id }: { id: string }) {
                         </button>
                       </div>
                     ))}
-                    {Array.from({ length: Math.max(0, 4 - uploadedImages.length) }).map(
-                      (_, index) => (
-                        <div
-                          key={`empty-${index}`}
-                          className="aspect-square border border-gray-300 rounded-lg flex items-center justify-center bg-gray-50"
-                        >
-                          <ImageIcon className="w-6 h-6 text-gray-300" />
-                        </div>
-                      )
-                    )}
+                    {Array.from({
+                      length: Math.max(0, 4 - uploadedImages.length),
+                    }).map((_, index) => (
+                      <div
+                        key={`empty-${index}`}
+                        className="aspect-square border border-gray-300 rounded-lg flex items-center justify-center bg-gray-50"
+                      >
+                        <ImageIcon className="w-6 h-6 text-gray-300" />
+                      </div>
+                    ))}
                   </div>
                   <label className="mt-2 flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
                     <Upload className="w-5 h-5 mr-2" />
@@ -1489,6 +1501,21 @@ export default function EditProduct({ id }: { id: string }) {
                   </label>
                 </CardContent>
               </Card>
+
+              <div className="pt-[140px]">
+                <button
+                  type="submit"
+                  form="product-form" // links to your form id
+                  className="w-full bg-btnPrimary hover:bg-btnPrimary/80 text-white h-[50px] rounded-lg flex items-center justify-center gap-2"
+                  disabled={updateProductMutation.isPending}
+                >
+                  {updateProductMutation.isPending ? (
+                    <Loader2 className="animate-spin w-5 h-5" />
+                  ) : (
+                    "Edit Product"
+                  )}
+                </button>
+              </div>
             </div>
           </form>
         </Form>
