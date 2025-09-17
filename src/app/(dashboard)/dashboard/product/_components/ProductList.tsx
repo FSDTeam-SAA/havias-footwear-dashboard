@@ -1,8 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, Edit, Plus, Search, Trash2 } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Edit,
+  Plus,
+  Search,
+  Trash2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -27,6 +34,7 @@ import Title from "../../_components/Title";
 
 const ProductList = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const sesion = useSession();
@@ -35,14 +43,24 @@ const ProductList = () => {
   const token = (sesion?.data?.user as { accessToken: string })?.accessToken;
   const queryClient = useQueryClient();
 
+  // Debounce effect for search
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1); // Reset to first page whenever search changes
+    }, 500);
+
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
   const { data, isLoading, isError } = useQuery<ProductResponse>({
-    queryKey: ["products", currentPage, searchTerm],
+    queryKey: ["products", currentPage, debouncedSearchTerm],
     queryFn: async () => {
       const res = await fetch(
         `${
           process.env.NEXT_PUBLIC_BACKEND_URL
         }/product/all-products?searchTerm=${encodeURIComponent(
-          searchTerm
+          debouncedSearchTerm
         )}&page=${currentPage}&limit=${itemsPerPage}`,
         {
           headers: {
@@ -59,7 +77,6 @@ const ProductList = () => {
 
   const products = data?.data ?? [];
   const meta = data?.meta;
-  console.log("meta", meta)
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= (meta?.totalPages ?? 1)) {
@@ -113,7 +130,6 @@ const ProductList = () => {
     },
   });
 
-  // Open delete confirmation modal
   const confirmDelete = (sellerId: string) => {
     setProductToDelete(sellerId);
     setDeleteModalOpen(true);
@@ -129,20 +145,14 @@ const ProductList = () => {
       {/* Header */}
       <div className="border-b border-gray-200 pb-8">
         <div className="flex items-center justify-between">
-          <Title
-            title="Products"
-            active="Dashboard > Product > List"
-          />
+          <Title title="Products" active="Dashboard > Product > List" />
 
           <div className="flex items-center space-x-3 w-full sm:w-auto">
             <div className="relative w-full sm:w-64">
               <Input
                 placeholder="Search products..."
                 value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value);
-                  setCurrentPage(1);
-                }}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="h-[50px] w-full pr-10 border border-[#0000001A]"
               />
               <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
@@ -181,7 +191,7 @@ const ProductList = () => {
               </TableHeader>
               <TableBody>
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <TableRow key={i} className="">
+                  <TableRow key={i}>
                     <TableCell>
                       <div className="flex items-center space-x-4">
                         <Skeleton className="w-16 h-16 rounded-lg" />
@@ -229,17 +239,35 @@ const ProductList = () => {
             <Table>
               <TableHeader>
                 <TableRow className="border-b border-gray-300">
-                  <TableHead className="ffont-medium text-[18px] text-[#1C2228] uppercase tracking-wide w-80">Product Name</TableHead>
-                  <TableHead className="font-medium text-[18px] text-[#1C2228] uppercase tracking-wide text-center w-24">ID</TableHead>
-                  <TableHead className="font-medium text-[18px] text-[#1C2228] uppercase tracking-wide text-center w-24">MSRP</TableHead>
-                  <TableHead className="font-medium text-[18px] text-[#1C2228] uppercase tracking-wide text-center w-20">MOQ</TableHead>
-                  <TableHead className="font-medium text-[18px] text-[#1C2228] uppercase tracking-wide text-center w-24">Unit Price</TableHead>
-                  <TableHead className="font-medium text-[18px] text-[#1C2228] uppercase tracking-wide text-center w-20">Quantity</TableHead>
-                  <TableHead className="font-medium text-[18px] text-[#1C2228] uppercase tracking-wide text-center w-40">Date Added</TableHead>
-                  <TableHead className="font-medium text-[18px] text-[#1C2228] uppercase tracking-wide text-center w-28">Actions</TableHead>
+                  <TableHead className="ffont-medium text-[18px] text-[#1C2228] uppercase tracking-wide w-80">
+                    Product Name
+                  </TableHead>
+                  <TableHead className="font-medium text-[18px] text-[#1C2228] uppercase tracking-wide text-center w-24">
+                    ID
+                  </TableHead>
+                  <TableHead className="font-medium text-[18px] text-[#1C2228] uppercase tracking-wide text-center w-24">
+                    MSRP
+                  </TableHead>
+                  <TableHead className="font-medium text-[18px] text-[#1C2228] uppercase tracking-wide text-center w-20">
+                    MOQ
+                  </TableHead>
+                  <TableHead className="font-medium text-[18px] text-[#1C2228] uppercase tracking-wide text-center w-24">
+                    Unit Price
+                  </TableHead>
+                  <TableHead className="font-medium text-[18px] text-[#1C2228] uppercase tracking-wide text-center w-20">
+                    Quantity
+                  </TableHead>
+                  <TableHead className="font-medium text-[18px] text-[#1C2228] uppercase tracking-wide text-center w-40">
+                    Date Added
+                  </TableHead>
+                  <TableHead className="font-medium text-[18px] text-[#1C2228] uppercase tracking-wide text-center w-28">
+                    Status
+                  </TableHead>
+                  <TableHead className="font-medium text-[18px] text-[#1C2228] uppercase tracking-wide text-center w-28">
+                    Actions
+                  </TableHead>
                 </TableRow>
               </TableHeader>
-
               <TableBody>
                 {products.map((product: Product) => (
                   <TableRow key={product._id}>
@@ -285,6 +313,19 @@ const ProductList = () => {
                       </div>
                     </TableCell>
                     <TableCell className="text-center px-4 py-4">
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          product.status === "approved"
+                            ? "bg-green-100 text-green-700"
+                            : product.status === "pending"
+                            ? "bg-yellow-100 text-yellow-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {product.status}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-center px-4 py-4">
                       <div className="flex justify-center items-center gap-2">
                         <Link href={`/dashboard/product/edit/${product._id}`}>
                           <Button
@@ -319,11 +360,11 @@ const ProductList = () => {
               <p className="text-sm text-gray-600">
                 Showing{" "}
                 <span className="font-medium">
-                  {(meta.page - 1) * meta.limit + 1}
+                  {(currentPage - 1) * itemsPerPage + 1}
                 </span>{" "}
                 to{" "}
                 <span className="font-medium">
-                  {Math.min(meta.page * meta.limit, meta.total)}
+                  {Math.min(currentPage * itemsPerPage, meta.total)}
                 </span>{" "}
                 of <span className="font-medium">{meta.total}</span> results
               </p>
@@ -368,6 +409,7 @@ const ProductList = () => {
           </div>
         )}
       </div>
+
       <ConfirmationModal
         isOpen={deleteModalOpen}
         onConfirm={handleDelete}
