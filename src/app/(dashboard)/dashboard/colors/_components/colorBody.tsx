@@ -58,7 +58,7 @@ const ColorsBody = () => {
 
           
         </div>
-      </div>Edit Color
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-6 mt-10">
         {/* Colors Name */}
