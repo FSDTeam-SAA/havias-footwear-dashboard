@@ -22,6 +22,7 @@ import {
 import SingelSellersProfile from "./singelSllersDetails";
 import { toast } from "sonner";
 import Title from "../../_components/Title";
+import ConfirmationModal from "@/components/confirmationModal";
 
 const SellerList = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -29,8 +30,14 @@ const SellerList = () => {
   const session = useSession();
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
+
+  // 🔹 New state for delete confirmation
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [sellerToDelete, setSellerToDelete] = useState<string | null>(null);
+
   const token = (session?.data?.user as { accessToken: string })?.accessToken;
   const queryClient = useQueryClient();
+
   const { data, isLoading } = useQuery<SellersResponse>({
     queryKey: ["sellers", currentPage, itemsPerPage],
     queryFn: async () => {
@@ -59,7 +66,7 @@ const SellerList = () => {
     }
   };
 
-  // Mutation to delete seller
+  // 🔹 Delete mutation
   const deleteSellerMutation = useMutation({
     mutationFn: async (sellerId: string) => {
       const res = await fetch(
@@ -77,24 +84,37 @@ const SellerList = () => {
         throw new Error(resData.message || "Failed to delete seller");
       return resData;
     },
-    onSuccess: (_, sellerId) => {
+    onSuccess: () => {
       toast.success("Seller deleted successfully");
-      queryClient.setQueryData<SellersResponse>(["sellers"], (oldData) => {
-        if (!oldData) return oldData;
-        const filtered = oldData.data.data.filter((s) => s._id !== sellerId);
-        return { ...oldData, data: { ...oldData.data, data: filtered } };
-      });
+      // queryClient.setQueryData<SellersResponse>(["sellers"], (oldData) => {
+      //   if (!oldData) return oldData;
+      //   const filtered = oldData.data.data.filter((s) => s._id !== sellerId);
+      //   return { ...oldData, data: { ...oldData.data, data: filtered } };
+      // });
+      queryClient.invalidateQueries({ queryKey: ["sellers"] });
     },
     onError: (error) => {
       toast.error(error.message || "Failed to delete seller");
     },
   });
 
+  // 🔹 Handle delete confirm
+  const handleDelete = () => {
+    if (sellerToDelete) {
+      deleteSellerMutation.mutate(sellerToDelete);
+      setSellerToDelete(null);
+      setDeleteModalOpen(false);
+    }
+  };
+
   return (
     <div>
       {/* Header Section */}
       <div className="flex justify-between pb-7">
-        <Title title="Seller Profile Request" active="Dashboard > Seller Profile Request > List" />
+        <Title
+          title="Seller Profile Request"
+          active="Dashboard > Seller Profile Request > List"
+        />
 
         <Card>
           <CardContent className="bg-[#797068] flex flex-col items-center rounded-md py-3 px-6">
@@ -187,9 +207,10 @@ const SellerList = () => {
                           <Eye className="!w-5 !h-5 mr-1" />
                         </Button>
                         <Button
-                          onClick={() =>
-                            deleteSellerMutation.mutate(seller._id)
-                          }
+                          onClick={() => {
+                            setSellerToDelete(seller._id);
+                            setDeleteModalOpen(true);
+                          }}
                           variant="ghost"
                           size="sm"
                           className="h-8 px-2 hover:bg-red-50 hover:text-red-600 transition-colors"
@@ -278,6 +299,17 @@ const SellerList = () => {
         open={open}
         openChange={setOpen}
         id={selectedUserId}
+      />
+
+      {/* ✅ Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={deleteModalOpen}
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteModalOpen(false)}
+        title="Delete Seller"
+        description="Are you sure you want to delete this seller? This action cannot be undone."
+        confirmText={`Delete ${deleteSellerMutation.isPending ? "..." : ""}`}
+        cancelText="Cancel"
       />
     </div>
   );
