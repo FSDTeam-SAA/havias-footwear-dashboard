@@ -64,7 +64,8 @@ const OrderList = () => {
         <div className="overflow-x-auto">
           <Table className="w-full ">
             <TableHeader className="">
-              <TableRow className="">
+              <TableRow className="">ls
+                
                 <TableHead className="py-4 font-medium text-[18px] text-[#1C2228] uppercase tracking-wide w-60">
                   Product
                 </TableHead>
@@ -72,7 +73,7 @@ const OrderList = () => {
                   Price
                 </TableHead>
                 <TableHead className="py-4 font-medium text-[18px] text-[#1C2228] uppercase tracking-wide w-40">
-                  Delivery Date
+                  Order Date
                 </TableHead>
               </TableRow>
             </TableHeader>
