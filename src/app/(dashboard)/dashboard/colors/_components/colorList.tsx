@@ -17,6 +17,7 @@ import { ColorsResponse, Color } from "../../../../../../types/colorDataTypes";
 import Link from "next/link";
 import { toast } from "sonner";
 import Title from "../../_components/Title";
+import ConfirmationModal from "@/components/confirmationModal";
 
 const ColorList = () => {
   const session = useSession();
@@ -24,6 +25,8 @@ const ColorList = () => {
   const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [colorToDelete, setColorToDelete] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery<ColorsResponse>({
     queryKey: ["color", currentPage],
@@ -44,7 +47,7 @@ const ColorList = () => {
   });
 
   // 🔹 Delete mutation
-  const { mutate: deleteColor } = useMutation({
+  const { mutate: deleteColor, isPending: isDeleting } = useMutation({
     mutationFn: async (id: string) => {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/color/${id}`,
@@ -69,8 +72,20 @@ const ColorList = () => {
     },
   });
 
+  const handleDelete = () => {
+    if (colorToDelete) {
+      deleteColor(colorToDelete);
+      setColorToDelete(null);
+      setDeleteModalOpen(false);
+    }
+  };
+
   if (isLoading) {
-    return <p>Loading...</p>;
+    return (
+      <div className="flex items-center justify-center h-[90vh]">
+        <div className="w-10 h-10 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+      </div>
+    );
   }
 
   const colors: Color[] = data?.data?.data ?? [];
@@ -81,10 +96,7 @@ const ColorList = () => {
     <div className="">
       <div className="border-b border-gray-200 pb-12">
         <div className="flex items-center justify-between">
-           <Title
-            title="Colors List"
-            active="Dashboard > Colors List > List"
-          />
+          <Title title="Colors List" active="Dashboard > Colors List > List" />
 
           <Button
             size="sm"
@@ -104,9 +116,15 @@ const ColorList = () => {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="text-[18px] font-medium text-[#131313] pl-10">Name</TableHead>
-            <TableHead className="text-[18px] font-medium text-[#131313]">Code</TableHead>
-            <TableHead className="text-[18px] font-medium text-[#131313]">Date</TableHead>
+            <TableHead className="text-[18px] font-medium text-[#131313] pl-10">
+              Name
+            </TableHead>
+            <TableHead className="text-[18px] font-medium text-[#131313]">
+              Code
+            </TableHead>
+            <TableHead className="text-[18px] font-medium text-[#131313]">
+              Date
+            </TableHead>
             <TableHead className="text-right text-[18px] font-medium text-[#131313] pr-12">
               Actions
             </TableHead>
@@ -115,7 +133,9 @@ const ColorList = () => {
         <TableBody>
           {colors.map((color) => (
             <TableRow key={color._id} className="items-center">
-              <TableCell className="py-6 pl-10 text-base">{color.name}</TableCell>
+              <TableCell className="py-6 pl-10 text-base">
+                {color.name}
+              </TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">
                   <div
@@ -139,7 +159,10 @@ const ColorList = () => {
                     </Link>
                   </button>
                   <button
-                    onClick={() => deleteColor(color._id)}
+                    onClick={() => {
+                      setColorToDelete(color._id);
+                      setDeleteModalOpen(true);
+                    }}
                     className="text-red-600 hover:text-red-800"
                   >
                     <Trash2 size={18} />
@@ -206,6 +229,16 @@ const ColorList = () => {
           </div>
         </div>
       )}
+
+      <ConfirmationModal
+        isOpen={deleteModalOpen}
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteModalOpen(false)}
+        title="Delete Color"
+        description="Are you sure you want to delete this color? This action cannot be undone."
+        confirmText={`Delete ${isDeleting ? "..." : ""}`}
+        cancelText="Cancel"
+      />
     </div>
   );
 };
