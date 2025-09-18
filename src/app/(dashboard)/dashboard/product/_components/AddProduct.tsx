@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { z } from "zod";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Upload, ImageIcon, X, Loader2, Save } from "lucide-react"; // Added X icon
+import { Upload, ImageIcon, X, Loader2, Save } from "lucide-react";
 import Image from "next/image";
 import "react-quill/dist/quill.snow.css";
 import { TagsInput } from "@/components/ui/tagsInput";
@@ -432,9 +432,6 @@ export default function AddProduct() {
                         placeholder="Enter sizes here..."
                       />
                     )}
-
-
-                    
                   />
                   {form.formState.errors.size && (
                     <p className="text-red-500 text-sm">
@@ -674,29 +671,32 @@ export default function AddProduct() {
                     ))}
                   </div>
                   <div className="lg:col-span-3 flex flex-col gap-2">
-  <Button
-    type="submit"
-    form="product-form"
-    className="mt-4 bg-btnPrimary hover:bg-btnPrimary/60  w-full  !h-[50px] text-base flex items-center justify-center gap-2"
-    disabled={createProductMutation.isPending || !form.getValues("subCategory")}
-  >
-    <Save className="!w-[20px] !h-[20px]" />
-    Save Product
-    {createProductMutation.isPending && (
-      <Loader2 className="animate-spin ml-2" />
-    )}
-  </Button>
-  
-  {/* Message shown when button is disabled */}
-  {(createProductMutation.isPending || !form.getValues("subCategory")) && (
-    <p className="text-red-500 text-sm">
-      { !form.getValues("subCategory") 
-        ? "Please select a subcategory before saving." 
-        : "Saving product..." }
-    </p>
-  )}
-</div>
+                    <Button
+                      type="submit"
+                      form="product-form"
+                      className="mt-4 bg-btnPrimary hover:bg-btnPrimary/60  w-full  !h-[50px] text-base flex items-center justify-center gap-2"
+                      disabled={
+                        createProductMutation.isPending ||
+                        !form.getValues("subCategory")
+                      }
+                    >
+                      <Save className="!w-[20px] !h-[20px]" />
+                      Save Product
+                      {createProductMutation.isPending && (
+                        <Loader2 className="animate-spin ml-2" />
+                      )}
+                    </Button>
 
+                    {/* Message shown when button is disabled */}
+                    {(createProductMutation.isPending ||
+                      !form.getValues("subCategory")) && (
+                      <p className="text-red-500 text-sm">
+                        {!form.getValues("subCategory")
+                          ? "Please select a subcategory before saving."
+                          : "Saving product..."}
+                      </p>
+                    )}
+                  </div> 
                 </CardContent>
               </Card>
             </div>
